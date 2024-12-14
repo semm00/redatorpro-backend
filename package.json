@@ -1,9 +1,8 @@
 {
   "name": "myapp",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
-    "built": "npx prisma generate",
+    "build": "npx prisma generate",
     "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
