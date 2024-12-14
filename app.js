@@ -15,6 +15,7 @@ app.get('/', (req, res) => {
 app.use(userRouter)
 
 
-app.listen(3000, () => {
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => {
     console.log('app online na porta 3000')
 });
