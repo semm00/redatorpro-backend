@@ -21,7 +21,7 @@ router.post("/server", upload.single("file"), async (req, res) => {
         const file = req.file;
         if (!file) return res.status(400).json({ error: "Nenhum arquivo enviado." });
 
-        const filePath = `${Date.now()}_${file.originalname}.`;
+        const filePath = `${Date.now()}_${file.originalname}`;
 
         const { data, error } = await supabase.storage
             .from("redator")
