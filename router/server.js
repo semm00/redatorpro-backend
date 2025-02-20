@@ -1,13 +1,7 @@
-require("dotenv").config(); // Carrega variáveis de ambiente do .env
-
 const express = require("express");
-const cors = require("cors"); // Adicionado para evitar problemas com CORS
+const router = express.Router(); // Usando router em vez de app diretamente
 const multer = require("multer");
 const { createClient } = require("@supabase/supabase-js");
-
-const app = express();
-app.use(cors()); // Permite requisições do frontend
-app.use(express.json()); // Garante que o Express consiga lidar com JSON
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -21,7 +15,8 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-app.post("/server", upload.single("file"), async (req, res) => {
+// Rota de upload
+router.post("/server", upload.single("file"), async (req, res) => {
     try {
         const file = req.file;
         if (!file) return res.status(400).json({ error: "Nenhum arquivo enviado." });
@@ -29,8 +24,8 @@ app.post("/server", upload.single("file"), async (req, res) => {
         const filePath = `${Date.now()}_${file.originalname}.`;
 
         const { data, error } = await supabase.storage
-        .from("redator")
-        .upload(filePath, file.buffer, { contentType: file.mimetype });
+            .from("redator")
+            .upload(filePath, file.buffer, { contentType: file.mimetype });
 
         if (error) throw error;
 
@@ -42,5 +37,5 @@ app.post("/server", upload.single("file"), async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+module.exports = router; // Exporta as rotas para o arquivo principal
+
