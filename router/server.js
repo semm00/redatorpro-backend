@@ -21,7 +21,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-app.post("/upload", upload.single("file"), async (req, res) => {
+app.post("/server", upload.single("file"), async (req, res) => {
     try {
         const file = req.file;
         if (!file) return res.status(400).json({ error: "Nenhum arquivo enviado." });
