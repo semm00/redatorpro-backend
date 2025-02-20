@@ -26,15 +26,15 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         const file = req.file;
         if (!file) return res.status(400).json({ error: "Nenhum arquivo enviado." });
 
-        const filePath = `uploads/${Date.now()}_${file.originalname}`;
+        const filePath = `${Date.now()}_${file.originalname}.`;
 
         const { data, error } = await supabase.storage
-            .from("uploads")
-            .upload(filePath, file.buffer, { contentType: file.mimetype });
+        .from("redator")
+        .upload(filePath, file.buffer, { contentType: file.mimetype });
 
         if (error) throw error;
 
-        const publicUrl = supabase.storage.from("uploads").getPublicUrl(filePath).data.publicUrl;
+        const publicUrl = supabase.storage.from("redator").getPublicUrl(filePath).data.publicUrl;
         res.json({ url: publicUrl });
     } catch (error) {
         console.error("Erro no upload:", error.message);
