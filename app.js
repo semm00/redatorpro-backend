@@ -3,6 +3,10 @@ import express from 'express'; // Certifique-se de usar 'express' com 'e' minús
 import logger from './middlewares/logger.js';
 import userRouter from './router/users.js';
 import serverRouter from './router/server.js'; // Importe o router do server.js
+import dotenv from 'dotenv';
+
+// Carregar variáveis de ambiente do arquivo .env
+dotenv.config();
 
 const app = express(); // Certifique-se de usar 'express' com 'e' minúsculo
 app.use(cors());
