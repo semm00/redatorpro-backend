@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router(); // Usando router em vez de app diretamente
+const router = express.Router();
 const multer = require("multer");
 const { createClient } = require("@supabase/supabase-js");
 
@@ -16,7 +16,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Rota de upload
-router.post("/server", upload.single("file"), async (req, res) => {
+router.post("/", upload.single("file"), async (req, res) => {
     try {
         const file = req.file;
         if (!file) return res.status(400).json({ error: "Nenhum arquivo enviado." });
@@ -37,5 +37,5 @@ router.post("/server", upload.single("file"), async (req, res) => {
     }
 });
 
-module.exports = router; // Exporta as rotas para o arquivo principal
+module.exports = router;
 

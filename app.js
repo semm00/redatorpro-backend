@@ -1,12 +1,12 @@
 import cors from 'cors';
-import Express from 'express';
+import express from 'express'; // Certifique-se de usar 'express' com 'e' minúsculo
 import logger from './middlewares/logger.js';
 import userRouter from './router/users.js';
 import serverRouter from './router/server.js'; // Importe o router do server.js
 
-const app = Express();
+const app = express(); // Certifique-se de usar 'express' com 'e' minúsculo
 app.use(cors());
-app.use(Express.json());
+app.use(express.json());
 
 app.use(logger);
 
@@ -14,8 +14,8 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-app.use(userRouter);
-app.use(serverRouter); // Use o router do server.js
+app.use('/users', userRouter); // Adicione um prefixo para o userRouter
+app.use('/server', serverRouter); // Adicione um prefixo para o serverRouter
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
