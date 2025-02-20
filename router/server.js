@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const multer = require("multer");
-const { createClient } = require("@supabase/supabase-js");
+import express from 'express';
+import multer from 'multer';
+import { createClient } from '@supabase/supabase-js';
 
+const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -38,4 +38,3 @@ router.post("/", upload.single("file"), async (req, res) => {
 });
 
 export default router;
-
