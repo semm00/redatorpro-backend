@@ -1,8 +1,10 @@
 import express from 'express';
 import multer from 'multer';
 import { createClient } from '@supabase/supabase-js';
+import { PrismaClient } from '@prisma/client';
 
 const router = express.Router();
+const prisma = new PrismaClient();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
