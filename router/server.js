@@ -51,4 +51,19 @@ router.post("/", upload.single("file"), async (req, res) => {
     }
 });
 
+// Rota para obter todas as redações
+router.get("/", async (req, res) => {
+    try {
+        const essays = await prisma.essay.findMany({
+            include: {
+                author: true
+            }
+        });
+        res.json(essays);
+    } catch (error) {
+        console.error("Erro ao obter redações:", error.message);
+        res.status(500).json({ error: "Erro ao obter redações." });
+    }
+});
+
 export default router;
