@@ -21,18 +21,30 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 router.post("/", upload.single("file"), async (req, res) => {
     try {
         const file = req.file;
-        if (!file) return res.status(400).json({ error: "Nenhum arquivo enviado." });
+        const text = req.body.text;
+        let publicUrl = null;
 
-        const filePath = `${Date.now()}_${file.originalname}`;
+        if (file) {
+            const filePath = `${Date.now()}_${file.originalname}`;
+            const { data, error } = await supabase.storage
+                .from("redator")
+                .upload(filePath, file.buffer, { contentType: file.mimetype });
 
-        const { data, error } = await supabase.storage
-            .from("redator")
-            .upload(filePath, file.buffer, { contentType: file.mimetype });
+            if (error) throw error;
 
-        if (error) throw error;
+            publicUrl = supabase.storage.from("redator").getPublicUrl(filePath).data.publicUrl;
+        }
 
-        const publicUrl = supabase.storage.from("redator").getPublicUrl(filePath).data.publicUrl;
-        res.json({ url: publicUrl });
+        // Salvar a redação no banco de dados
+        const essay = await prisma.essay.create({
+            data: {
+                text: text || null,
+                urlImage: publicUrl || null,
+                authorId: 1 // Substitua pelo ID do usuário autenticado
+            }
+        });
+
+        res.json({ url: publicUrl, essay });
     } catch (error) {
         console.error("Erro no upload:", error.message);
         res.status(500).json({ error: "Erro ao enviar arquivo." });
