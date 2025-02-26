@@ -20,46 +20,46 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Rota de upload
 router.post("/", upload.single("file"), async (req, res) => {
     try {
-        // 1️⃣ Verifica se o usuário está autenticado
-        if (!req.session.user) {
-            return res.status(401).json({ error: "Usuário não autenticado." });
-        }
-
-        // 2️⃣ Obtém o ID do usuário autenticado da sessão
-        const userId = req.session.user.id;
-
-        const file = req.file;
-        const text = req.body.text;
-        let publicUrl = null;
-
-        // 3️⃣ Se houver imagem, faz upload no Supabase
-        if (file) {
-            const filePath = `${Date.now()}_${file.originalname}`;
-            const { data, error } = await supabase.storage
-                .from("redator")
-                .upload(filePath, file.buffer, { contentType: file.mimetype });
-
-            if (error) throw error;
-
-            publicUrl = supabase.storage.from("redator").getPublicUrl(filePath).data.publicUrl;
-        }
-
-        // 4️⃣ Salva a redação no banco de dados com o ID correto do usuário logado
-        const essay = await prisma.essay.create({
-            data: {
-                text: text || null,
-                urlImage: publicUrl || null,
-                authorId: userId // 🔥 Agora salva o ID correto
-            }
-        });
-
-        res.json({ url: publicUrl, essay });
+      // 🔹 Verifica se o usuário está logado
+      if (!req.session.user) {
+        return res.status(401).json({ error: "Usuário não autenticado." });
+      }
+  
+      // 🔹 Obtém o ID do usuário logado
+      const userId = req.session.user.id;
+  
+      const file = req.file;
+      const text = req.body.text;
+      let publicUrl = null;
+  
+      // 🔹 Upload da imagem no Supabase
+      if (file) {
+        const filePath = `${Date.now()}_${file.originalname}`;
+        const { data, error } = await supabase.storage
+          .from("redator")
+          .upload(filePath, file.buffer, { contentType: file.mimetype });
+  
+        if (error) throw error;
+  
+        publicUrl = supabase.storage.from("redator").getPublicUrl(filePath).data.publicUrl;
+      }
+  
+      // 🔹 Salva no banco de dados com o authorId correto
+      const essay = await prisma.essay.create({
+        data: {
+          text: text || null,
+          urlImage: publicUrl || null,
+          authorId: userId, // 🔥 Aqui pega o ID do usuário logado
+        },
+      });
+  
+      res.json({ url: publicUrl, essay });
     } catch (error) {
-        console.error("Erro no upload:", error.message);
-        res.status(500).json({ error: "Erro ao enviar arquivo." });
+      console.error("Erro no upload:", error.message);
+      res.status(500).json({ error: "Erro ao enviar arquivo." });
     }
-});
-
+  });
+  
 // Rota para obter todas as redações
 router.get("/", async (req, res) => {
     try {
