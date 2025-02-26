@@ -20,10 +20,19 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Rota de upload
 router.post("/", upload.single("file"), async (req, res) => {
     try {
+        // 1️⃣ Verifica se o usuário está autenticado
+        if (!req.session.user) {
+            return res.status(401).json({ error: "Usuário não autenticado." });
+        }
+
+        // 2️⃣ Obtém o ID do usuário autenticado da sessão
+        const userId = req.session.user.id;
+
         const file = req.file;
         const text = req.body.text;
         let publicUrl = null;
 
+        // 3️⃣ Se houver imagem, faz upload no Supabase
         if (file) {
             const filePath = `${Date.now()}_${file.originalname}`;
             const { data, error } = await supabase.storage
@@ -35,12 +44,12 @@ router.post("/", upload.single("file"), async (req, res) => {
             publicUrl = supabase.storage.from("redator").getPublicUrl(filePath).data.publicUrl;
         }
 
-        // Salvar a redação no banco de dados
+        // 4️⃣ Salva a redação no banco de dados com o ID correto do usuário logado
         const essay = await prisma.essay.create({
             data: {
                 text: text || null,
                 urlImage: publicUrl || null,
-                authorId: 1 // Substitua pelo ID do usuário autenticado
+                authorId: userId // 🔥 Agora salva o ID correto
             }
         });
 
