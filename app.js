@@ -13,7 +13,10 @@ dotenv.config();
 const app = express();
 const PgSession = pgSession(session);
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://ifpi-picos.github.io/projeto-integrador-redatorpro/login.html#', // Substitua pela URL do seu front-end
+  credentials: true
+}));
 app.use(express.json());
 
 // Configurar o middleware de sessão
