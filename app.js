@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/users', userRouter);
-app.use('/login', loginRouter);
+app.use('/login', loginRouter); // Certifique-se de que o loginRouter está registrado aqui
 app.use('/server', serverRouter);
 
 const PORT = process.env.PORT || 3000;
