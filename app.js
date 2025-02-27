@@ -10,36 +10,38 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 const app = express();
+app.set('trust proxy', 1);  // Confia no proxy (necessário no Render)
+
 const PgSession = pgSession(session);
 
 app.use(cors({
-  origin: 'https://ifpi-picos.github.io', // URL base do front-end
+  origin: 'https://ifpi-picos.github.io', // URL do front-end
   credentials: true,
 }));
 app.use(express.json());
 
-// Configurar o middleware de sessão
+// Configurar o middleware de sessão com cookie cross-site
 app.use(session({
   store: new PgSession({
     conString: process.env.DATABASE_URL,
   }),
-  secret: 'your-secret-key', // Substitua por uma chave secreta segura
+  secret: 'your-secret-key',  // substitua por uma chave segura
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // Mude para true se usar HTTPS
+  cookie: { secure: true, sameSite: 'none' } // Necessário para HTTPS e cross-site
 }));
 
 app.use(logger);
 
 app.get('/', (req, res) => {
-    res.send('Hello World!');
+  res.send('Hello World!');
 });
 
 app.use('/users', userRouter);
-app.use('/login', loginRouter); // Certifique-se de que o loginRouter está registrado aqui
+app.use('/login', loginRouter);
 app.use('/server', serverRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor online na porta ${PORT}`);
+  console.log(`Servidor online na porta ${PORT}`);
 });
