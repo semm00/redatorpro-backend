@@ -1,7 +1,8 @@
-const express = require('express');
-const bcrypt = require('bcrypt'); // Certifique-se de instalar com "npm install bcrypt"
+import express from 'express';
+import bcrypt from 'bcrypt'; // Certifique-se de instalar com "npm install bcrypt"
+import { PrismaClient } from '@prisma/client';
+
 const router = express.Router();
-const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 router.post('/login', async (req, res) => {
