@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client';
 const router = express.Router();
 const prisma = new PrismaClient();
 
-router.post('/', async (req, res) => {  // Modificado de '/login' para '/'
+router.post('/', async (req, res) => {  // Rota para login
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -13,7 +13,8 @@ router.post('/', async (req, res) => {  // Modificado de '/login' para '/'
   }
 
   try {
-    const user = await prisma.user.findUnique({
+    // Use prisma.users.findUnique se o modelo estiver nomeado como "users" no Prisma schema
+    const user = await prisma.users.findUnique({
       where: { email }
     });
 
