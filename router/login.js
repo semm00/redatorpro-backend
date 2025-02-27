@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client';
 const router = express.Router();
 const prisma = new PrismaClient();
 
-router.post('/login', async (req, res) => {
+router.post('/', async (req, res) => {  // Modificado de '/login' para '/'
   const { email, password } = req.body;
 
   if (!email || !password) {
