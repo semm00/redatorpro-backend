@@ -13,7 +13,7 @@ const app = express();
 const PgSession = pgSession(session);
 
 app.use(cors({
-  origin: 'https://ifpi-picos.github.io/projeto-integrador-redatorpro', // URL base do front-end
+  origin: 'https://ifpi-picos.github.io', // URL base do front-end
   credentials: true,
 }));
 app.use(express.json());
