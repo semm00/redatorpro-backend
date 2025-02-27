@@ -1,16 +1,33 @@
+import express from 'express';
 import cors from 'cors';
-import express from 'express'; // Certifique-se de usar 'express' com 'e' minúsculo
+import session from 'express-session';
+import pgSession from 'connect-pg-simple';
 import logger from './middlewares/logger.js';
 import userRouter from './router/users.js';
-import serverRouter from './router/server.js'; // Importe o router do server.js
+import loginRouter from './router/login.js';
+import serverRouter from './router/server.js';
 import dotenv from 'dotenv';
 
-// Carregar variáveis de ambiente do arquivo .env
 dotenv.config();
+const app = express();
+const PgSession = pgSession(session);
 
-const app = express(); // Certifique-se de usar 'express' com 'e' minúsculo
-app.use(cors());
+app.use(cors({
+  origin: 'https://ifpi-picos.github.io/projeto-integrador-redatorpro', // URL base do front-end
+  credentials: true,
+}));
 app.use(express.json());
+
+// Configurar o middleware de sessão
+app.use(session({
+  store: new PgSession({
+    conString: process.env.DATABASE_URL,
+  }),
+  secret: 'your-secret-key', // Substitua por uma chave secreta segura
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false } // Mude para true se usar HTTPS
+}));
 
 app.use(logger);
 
@@ -18,10 +35,11 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-app.use('/users', userRouter); // Adicione um prefixo para o userRouter
-app.use('/server', serverRouter); // Adicione um prefixo para o serverRouter
+app.use('/users', userRouter);
+app.use('/login', loginRouter);
+app.use('/server', serverRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`app online na porta ${PORT}`);
+    console.log(`Servidor online na porta ${PORT}`);
 });

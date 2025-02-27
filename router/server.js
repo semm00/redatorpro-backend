@@ -35,12 +35,17 @@ router.post("/", upload.single("file"), async (req, res) => {
             publicUrl = supabase.storage.from("redator").getPublicUrl(filePath).data.publicUrl;
         }
 
+        // Verifica se o usuário está autenticado
+        if (!req.session.user) {
+            return res.status(401).json({ error: "Usuário não autenticado." });
+        }
+
         // Salvar a redação no banco de dados
         const essay = await prisma.essay.create({
             data: {
                 text: text || null,
                 urlImage: publicUrl || null,
-                authorId: 1 // Substitua pelo ID do usuário autenticado
+                authorId: req.session.user.id // Usa o ID do usuário logado na sessão
             }
         });
 
