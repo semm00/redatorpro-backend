@@ -24,6 +24,7 @@ app.use(express.json());
 app.use(session({
   store: new PgSession({
     conString: process.env.DATABASE_URL,
+    createTableIfMissing: true // Cria a tabela de sessões automaticamente se não existir
   }),
   secret: 'your-secret-key',  // substitua por uma chave segura
   resave: false,
