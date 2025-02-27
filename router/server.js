@@ -24,21 +24,31 @@ router.post("/", upload.single("file"), async (req, res) => {
         const text = req.body.text;
         let publicUrl = null;
 
+        console.log("Iniciando upload...");
+        console.log("Arquivo recebido:", file);
+        console.log("Texto recebido:", text);
+
         if (file) {
             const filePath = `${Date.now()}_${file.originalname}`;
             const { data, error } = await supabase.storage
                 .from("redator")
                 .upload(filePath, file.buffer, { contentType: file.mimetype });
 
+            console.log("Resultado do upload:", { data, error });
+
             if (error) throw error;
 
             publicUrl = supabase.storage.from("redator").getPublicUrl(filePath).data.publicUrl;
+            console.log("URL pública do arquivo:", publicUrl);
         }
 
         // Verifica se o usuário está autenticado
         if (!req.session.user) {
+            console.log("Usuário não autenticado.");
             return res.status(401).json({ error: "Usuário não autenticado." });
         }
+
+        console.log("Usuário autenticado:", req.session.user);
 
         // Salvar a redação no banco de dados
         const essay = await prisma.essay.create({
@@ -48,6 +58,8 @@ router.post("/", upload.single("file"), async (req, res) => {
                 authorId: req.session.user.id // Usa o ID do usuário logado na sessão
             }
         });
+
+        console.log("Redação salva no banco de dados:", essay);
 
         res.json({ url: publicUrl, essay });
     } catch (error) {
