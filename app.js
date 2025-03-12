@@ -6,6 +6,8 @@ import logger from './middlewares/logger.js';
 import userRouter from './router/users.js';
 import loginRouter from './router/login.js';
 import serverRouter from './router/server.js';
+import pdfRoutes from "./router/pdf.js";
+
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -41,6 +43,8 @@ app.get('/', (req, res) => {
 app.use('/users', userRouter);
 app.use('/login', loginRouter);
 app.use('/server', serverRouter);
+app.use("/pdf", pdfRoutes);
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
