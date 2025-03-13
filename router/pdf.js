@@ -69,8 +69,8 @@ router.post("/gerar-pdf", async (req, res) => {
         // Definir cores e fonte
         const fundoAzulClaro = rgb(173 / 255, 216 / 255, 230 / 255);
         const preto = rgb(0, 0, 0);
-        const fonte = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        console.log("✍️ Fonte Helvetica embutida!");
+        const fonte = await pdfDoc.embedFont(StandardFonts.Courier);
+        console.log("✍️ Fonte Courier embutida!");
 
         // Desenhar fundo
         page.drawRectangle({
