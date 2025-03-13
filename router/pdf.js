@@ -140,4 +140,3 @@ router.post("/gerar-pdf", async (req, res) => {
 });
 
 export default router;
-// This code snippet creates a PDF file from text input and sends it back as a download response. It uses the pdf-lib library to generate the PDF document and express to handle the HTTP requests.
