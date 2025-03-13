@@ -109,7 +109,7 @@ router.post("/gerar-pdf", async (req, res) => {
         console.log("📏 Linhas horizontais desenhadas!");
         
         // Processar o texto (já existente) e limitar a 30 linhas:
-        const tamanhoFonte = 8;
+        const tamanhoFonte = 10;
         let linhasTexto = processarTexto(texto, fonte, tamanhoFonte, maxWidth);
         linhasTexto = linhasTexto.slice(0, totalLinhas);
         
