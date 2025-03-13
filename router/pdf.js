@@ -7,10 +7,10 @@ const router = express.Router();
 
 router.post("/gerar-pdf", async (req, res) => {
     console.log("📩 Recebendo requisição para gerar PDF...");
-    console.log("📜 Texto recebido:", req.body.texto);
 
     try {
         const { texto } = req.body;
+        console.log("📜 Texto recebido:", texto ? `"${texto.substring(0, 50)}..."` : "NÃO RECEBIDO");
 
         if (!texto || texto.trim() === "") {
             console.log("❌ Erro: Texto vazio!");
@@ -23,10 +23,13 @@ router.post("/gerar-pdf", async (req, res) => {
         const pdfDoc = await PDFDocument.create();
         const page = pdfDoc.addPage([600, 800]);
 
+        console.log("📄 Página do PDF criada!");
+
         // Definir cores e fonte
-        const azulClaro = rgb(173, 216, 230);
+        const azulClaro = rgb(173 / 255, 216 / 255, 230 / 255);
         const preto = rgb(0, 0, 0);
         const fonte = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        console.log("✍️ Fonte Helvetica embutida!");
 
         // Definir fundo azul claro
         page.drawRectangle({
@@ -37,7 +40,9 @@ router.post("/gerar-pdf", async (req, res) => {
             color: azulClaro,
         });
 
-        // Desenhar 30 linhas horizontais (espaçadas de 25px)
+        console.log("🎨 Fundo azul desenhado!");
+
+        // Desenhar linhas horizontais
         let linhaInicialY = 750;
         for (let i = 0; i < 30; i++) {
             page.drawLine({
@@ -48,9 +53,10 @@ router.post("/gerar-pdf", async (req, res) => {
             });
             linhaInicialY -= 25;
         }
+        console.log("📏 Linhas horizontais desenhadas!");
 
         // Adicionar o texto dentro das linhas
-        const linhasTexto = texto.split("\n").slice(0, 30); // Garantir que não ultrapasse 30 linhas
+        const linhasTexto = texto.split("\n").slice(0, 30);
         let textoY = 755;
 
         linhasTexto.forEach((linha, index) => {
@@ -63,17 +69,25 @@ router.post("/gerar-pdf", async (req, res) => {
             });
         });
 
+        console.log("📝 Texto adicionado ao PDF!");
+
         // Adicionar a logo na parte inferior
-        const logoPath = path.join(__dirname, "../public/logo.png"); // Caminho da logo
+        const logoPath = path.join(__dirname, "../assets/logo.png"); // Ajuste o caminho se necessário
+        console.log("📂 Verificando logo em:", logoPath);
+
         if (fs.existsSync(logoPath)) {
+            console.log("✅ Logo encontrada! Embutindo no PDF...");
             const logoBytes = fs.readFileSync(logoPath);
             const logoImage = await pdfDoc.embedPng(logoBytes);
+
             page.drawImage(logoImage, {
                 x: 200,
                 y: 20,
                 width: 200,
                 height: 50,
             });
+
+            console.log("🖼️ Logo adicionada ao PDF!");
         } else {
             console.log("⚠️ Logo não encontrada, pulando inserção.");
         }
@@ -96,4 +110,4 @@ router.post("/gerar-pdf", async (req, res) => {
 });
 
 export default router;
-
+// This code snippet creates a PDF file from text input and sends it back as a download response. It uses the pdf-lib library to generate the PDF document and express to handle the HTTP requests.
