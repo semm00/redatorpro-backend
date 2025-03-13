@@ -115,7 +115,7 @@ router.post("/gerar-pdf", async (req, res) => {
         // Desenhar o texto em cada linha exatamente onde a linha foi desenhada
         linhasTexto.forEach((linha, index) => {
             // Calcular a posição vertical: centraliza o texto dentro da linha
-            const y = pageHeight - topMargin - index * lineSpacing - 5;
+            const y = pageHeight - topMargin - index * lineSpacing - 12;
             page.drawText(linha, {
                 x: 55,
                 y,
