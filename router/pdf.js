@@ -2,6 +2,10 @@ import express from "express";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
@@ -72,7 +76,7 @@ router.post("/gerar-pdf", async (req, res) => {
         console.log("📝 Texto adicionado ao PDF!");
 
         // Adicionar a logo na parte inferior
-        const logoPath = path.join(__dirname, "../assets/logo.png"); // Ajuste o caminho se necessário
+        const logoPath = path.join(__dirname, "public/logo nome.png"); 
         console.log("📂 Verificando logo em:", logoPath);
 
         if (fs.existsSync(logoPath)) {
