@@ -83,11 +83,13 @@ router.post("/gerar-pdf", async (req, res) => {
         console.log("🎨 Fundo desenhado!");
 
         // Configurar valores para as linhas
-        const totalLinhas = 30;     // Total de linhas desenhadas (pode ser igual às linhas do front-end)
-        const lineSpacing = 30;     // Espaçamento de cada linha (igual ao CSS do textarea)
-        const topMargin = 50;       // Margem superior
-        const bottomMargin = 80;    // Reserva para a logo
-        const maxWidth = pageWidth - 100; // Espaço para o texto (ajuste conforme necessário)
+        const totalLinhas = 30;                // Número de linhas desejado
+        const topMargin = 30;                  // Reduzimos a margem superior para posicionar o texto mais acima
+        const bottomMargin = 80;               // Reserva para a logo
+        // Calcular o espaçamento dinamicamente para ter 30 linhas
+        const lineSpacing = (pageHeight - topMargin - bottomMargin) / totalLinhas;
+        const maxWidth = pageWidth - 100;      // Espaço para o texto (ajuste conforme necessário)
+
 
         // Calcular quantas linhas cabem na área útil
         const usableHeight = pageHeight - topMargin - bottomMargin;
@@ -95,7 +97,7 @@ router.post("/gerar-pdf", async (req, res) => {
         console.log(`📝 Espaço disponível permite até ${maxLinhas} linhas.`);
 
         // Desenhar linhas horizontais (do topo da área utilizável)
-        for (let i = 0; i < maxLinhas; i++) {
+        for (let i = 0; i < totalLinhas; i++) {
             const y = pageHeight - topMargin - i * lineSpacing;
             page.drawLine({
                 start: { x: 50, y },
@@ -105,17 +107,16 @@ router.post("/gerar-pdf", async (req, res) => {
             });
         }
         console.log("📏 Linhas horizontais desenhadas!");
-
-        // Processar o texto: quebra automática em cada parágrafo e word-wrap
+        
+        // Processar o texto (já existente) e limitar a 30 linhas:
         const tamanhoFonte = 12;
         let linhasTexto = processarTexto(texto, fonte, tamanhoFonte, maxWidth);
-        // Limitar às linhas disponíveis, para manter o mapeamento um-para-um com as linhas desenhadas
-        linhasTexto = linhasTexto.slice(0, maxLinhas);
-
-        // Desenhar o texto em cada linha exatamente onde a linha foi desenhada
+        linhasTexto = linhasTexto.slice(0, totalLinhas);
+        
+        // Desenhar o texto em cada linha com offset reduzido para posicionar mais acima
         linhasTexto.forEach((linha, index) => {
-            // Calcular a posição vertical: centraliza o texto dentro da linha
-            const y = pageHeight - topMargin - index * lineSpacing - 12;
+            // Ajuste o offset abaixo; sugiro 2px para mover o texto para cima
+            const y = pageHeight - topMargin - index * lineSpacing - 2;
             page.drawText(linha, {
                 x: 55,
                 y,
