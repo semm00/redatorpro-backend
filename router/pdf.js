@@ -9,7 +9,42 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// Neste exemplo usaremos cada quebra de linha (\n) para definir uma linha
+// Função para quebrar uma longa string considerando o tamanho do texto
+function quebrarTextoAutomatico(texto, fonte, tamanhoFonte, maxWidth) {
+    const palavras = texto.split(" ");
+    let linhas = [];
+    let linhaAtual = "";
+
+    for (const palavra of palavras) {
+        const testeLinha = linhaAtual.length === 0 ? palavra : linhaAtual + " " + palavra;
+        const largura = fonte.widthOfTextAtSize(testeLinha, tamanhoFonte);
+        if (largura > maxWidth && linhaAtual !== "") {
+            linhas.push(linhaAtual);
+            linhaAtual = palavra;
+        } else {
+            linhaAtual = testeLinha;
+        }
+    }
+    if (linhaAtual) linhas.push(linhaAtual);
+    return linhas;
+}
+
+// Função para tratar todo o texto: para cada parágrafo (separado por "\n"), aplica a quebra automática
+function processarTexto(texto, fonte, tamanhoFonte, maxWidth) {
+    let linhasFinais = [];
+    const paragrafos = texto.split("\n");
+    paragrafos.forEach(paragrafo => {
+        // Se o parágrafo for vazio, insere uma linha vazia
+        if (paragrafo.trim() === "") {
+            linhasFinais.push("");
+        } else {
+            const linhas = quebrarTextoAutomatico(paragrafo, fonte, tamanhoFonte, maxWidth);
+            linhasFinais.push(...linhas);
+        }
+    });
+    return linhasFinais;
+}
+
 router.post("/gerar-pdf", async (req, res) => {
     console.log("📩 Recebendo requisição para gerar PDF...");
 
@@ -24,7 +59,7 @@ router.post("/gerar-pdf", async (req, res) => {
 
         console.log("✅ Texto válido, iniciando geração do PDF...");
 
-        // Vamos aumentar a altura da página para acomodar o texto e reservar área para a logo
+        // Ajuste o tamanho da página para acomodar o conteúdo e a logo
         const pageWidth = 600;
         const pageHeight = 900;  
         const pdfDoc = await PDFDocument.create();
@@ -47,18 +82,19 @@ router.post("/gerar-pdf", async (req, res) => {
         });
         console.log("🎨 Fundo desenhado!");
 
-        // Configurar valores para as linhas e texto
-        const totalLinhas = 30;                // Número total de linhas (igual ao front-end)
-        const lineSpacing = 30;                // Espaçamento de 30px para cada linha (mesmo que no CSS)
-        const topMargin = 50;                  // Margem no topo para não desenhar colado à borda
-        const bottomMargin = 80;               // Reserva para a logo
-        const usableHeight = pageHeight - topMargin - bottomMargin;
-        
-        // Se o usableHeight dividido pelo lineSpacing for menor que o total de linhas, podemos ajustar
-        const maxLinhas = Math.floor(usableHeight / lineSpacing);
-        console.log(`📝 Espaço disponível permite desenhar até ${maxLinhas} linhas.`);
+        // Configurar valores para as linhas
+        const totalLinhas = 30;     // Total de linhas desenhadas (pode ser igual às linhas do front-end)
+        const lineSpacing = 30;     // Espaçamento de cada linha (igual ao CSS do textarea)
+        const topMargin = 50;       // Margem superior
+        const bottomMargin = 80;    // Reserva para a logo
+        const maxWidth = pageWidth - 100; // Espaço para o texto (ajuste conforme necessário)
 
-        // Desenhar linhas horizontais (começando no topo do usable area)
+        // Calcular quantas linhas cabem na área útil
+        const usableHeight = pageHeight - topMargin - bottomMargin;
+        const maxLinhas = Math.floor(usableHeight / lineSpacing);
+        console.log(`📝 Espaço disponível permite até ${maxLinhas} linhas.`);
+
+        // Desenhar linhas horizontais (do topo da área utilizável)
         for (let i = 0; i < maxLinhas; i++) {
             const y = pageHeight - topMargin - i * lineSpacing;
             page.drawLine({
@@ -70,33 +106,36 @@ router.post("/gerar-pdf", async (req, res) => {
         }
         console.log("📏 Linhas horizontais desenhadas!");
 
-        // Dividir o texto do textarea conforme as quebras de linha feitas pelo usuário
-        const linhasTexto = texto.split("\n").slice(0, maxLinhas);
-        // Posicionar o texto no mesmo local que as linhas (ajustando um pouco para centralizar na linha)
+        // Processar o texto: quebra automática em cada parágrafo e word-wrap
+        const tamanhoFonte = 12;
+        let linhasTexto = processarTexto(texto, fonte, tamanhoFonte, maxWidth);
+        // Limitar às linhas disponíveis, para manter o mapeamento um-para-um com as linhas desenhadas
+        linhasTexto = linhasTexto.slice(0, maxLinhas);
+
+        // Desenhar o texto em cada linha exatamente onde a linha foi desenhada
         linhasTexto.forEach((linha, index) => {
-            // A posição y é definida para que a linha 1 do textarea fique na linha 1 do PDF
-            const y = pageHeight - topMargin - index * lineSpacing - (lineSpacing - 12) / 2; // Ajuste (12 = tamanho da fonte)
+            // Calcular a posição vertical: centraliza o texto dentro da linha
+            const y = pageHeight - topMargin - index * lineSpacing - (lineSpacing - tamanhoFonte) / 2;
             page.drawText(linha, {
                 x: 55,
                 y,
-                size: 12,
+                size: tamanhoFonte,
                 font: fonte,
                 color: preto,
             });
         });
         console.log("📝 Texto adicionado ao PDF!");
 
-        // Adicionar a logo na parte inferior, garantindo que ela não sobreponha as linhas
+        // Adicionar a logo na parte inferior, sem que sobreponha o texto
         const logoPath = path.join(__dirname, "public/logo nome.png");
         console.log("📂 Verificando logo em:", logoPath);
         if (fs.existsSync(logoPath)) {
             console.log("✅ Logo encontrada! Embutindo no PDF...");
             const logoBytes = fs.readFileSync(logoPath);
             const logoImage = await pdfDoc.embedPng(logoBytes);
-            // Posicionar a logo dentro do bottomMargin
             page.drawImage(logoImage, {
                 x: 175,
-                y: 10,      // Certifique-se que esse Y está dentro da área reservada (10 + logo height <= bottomMargin)
+                y: 10, // Fica na área reservada para a logo
                 width: 250,
                 height: 60,
             });
