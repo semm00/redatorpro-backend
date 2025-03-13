@@ -9,30 +9,7 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-function quebrarTexto(texto, fonte, tamanhoFonte, maxWidth) {
-    const linhas = [];
-    let palavras = texto.split(" ");
-    let linhaAtual = "";
-
-    for (let palavra of palavras) {
-        let linhaTeste = linhaAtual.length === 0 ? palavra : `${linhaAtual} ${palavra}`;
-        let larguraTexto = fonte.widthOfTextAtSize(linhaTeste, tamanhoFonte);
-
-        if (larguraTexto < maxWidth) {
-            linhaAtual = linhaTeste;
-        } else {
-            linhas.push(linhaAtual);
-            linhaAtual = palavra;
-        }
-    }
-
-    if (linhaAtual) {
-        linhas.push(linhaAtual);
-    }
-
-    return linhas;
-}
-
+// Neste exemplo usaremos cada quebra de linha (\n) para definir uma linha
 router.post("/gerar-pdf", async (req, res) => {
     console.log("📩 Recebendo requisição para gerar PDF...");
 
@@ -47,91 +24,93 @@ router.post("/gerar-pdf", async (req, res) => {
 
         console.log("✅ Texto válido, iniciando geração do PDF...");
 
-        // Criar um novo documento PDF
+        // Vamos aumentar a altura da página para acomodar o texto e reservar área para a logo
+        const pageWidth = 600;
+        const pageHeight = 900;  
         const pdfDoc = await PDFDocument.create();
-        const page = pdfDoc.addPage([600, 800]);
-
+        const page = pdfDoc.addPage([pageWidth, pageHeight]);
         console.log("📄 Página do PDF criada!");
 
         // Definir cores e fonte
-        const azulClaro = rgb(173 / 255, 216 / 255, 230 / 255);
+        const fundoAzulClaro = rgb(173 / 255, 216 / 255, 230 / 255);
         const preto = rgb(0, 0, 0);
         const fonte = await pdfDoc.embedFont(StandardFonts.Helvetica);
         console.log("✍️ Fonte Helvetica embutida!");
 
-        // Definir fundo azul claro
+        // Desenhar fundo
         page.drawRectangle({
             x: 0,
             y: 0,
-            width: 600,
-            height: 800,
-            color: azulClaro,
+            width: pageWidth,
+            height: pageHeight,
+            color: fundoAzulClaro,
         });
+        console.log("🎨 Fundo desenhado!");
 
-        console.log("🎨 Fundo azul desenhado!");
+        // Configurar valores para as linhas e texto
+        const totalLinhas = 30;                // Número total de linhas (igual ao front-end)
+        const lineSpacing = 30;                // Espaçamento de 30px para cada linha (mesmo que no CSS)
+        const topMargin = 50;                  // Margem no topo para não desenhar colado à borda
+        const bottomMargin = 80;               // Reserva para a logo
+        const usableHeight = pageHeight - topMargin - bottomMargin;
+        
+        // Se o usableHeight dividido pelo lineSpacing for menor que o total de linhas, podemos ajustar
+        const maxLinhas = Math.floor(usableHeight / lineSpacing);
+        console.log(`📝 Espaço disponível permite desenhar até ${maxLinhas} linhas.`);
 
-        // Desenhar linhas horizontais
-        let linhaInicialY = 770;
-        for (let i = 0; i < 30; i++) {
+        // Desenhar linhas horizontais (começando no topo do usable area)
+        for (let i = 0; i < maxLinhas; i++) {
+            const y = pageHeight - topMargin - i * lineSpacing;
             page.drawLine({
-                start: { x: 50, y: linhaInicialY },
-                end: { x: 550, y: linhaInicialY },
+                start: { x: 50, y },
+                end: { x: pageWidth - 50, y },
                 thickness: 1,
                 color: preto,
             });
-            linhaInicialY -= 30; // Ajuste o espaçamento entre as linhas conforme necessário
         }
         console.log("📏 Linhas horizontais desenhadas!");
 
-        // Adicionar o texto dentro das linhas
-        const tamanhoFonte = 12;
-        const maxWidth = 500;
-        const linhasTexto = quebrarTexto(texto, fonte, tamanhoFonte, maxWidth).slice(0, 30);
-        let textoY = 755;
-
+        // Dividir o texto do textarea conforme as quebras de linha feitas pelo usuário
+        const linhasTexto = texto.split("\n").slice(0, maxLinhas);
+        // Posicionar o texto no mesmo local que as linhas (ajustando um pouco para centralizar na linha)
         linhasTexto.forEach((linha, index) => {
+            // A posição y é definida para que a linha 1 do textarea fique na linha 1 do PDF
+            const y = pageHeight - topMargin - index * lineSpacing - (lineSpacing - 12) / 2; // Ajuste (12 = tamanho da fonte)
             page.drawText(linha, {
                 x: 55,
-                y: textoY - index * 30, // Ajuste o espaçamento entre as linhas conforme necessário
-                size: tamanhoFonte,
+                y,
+                size: 12,
                 font: fonte,
                 color: preto,
             });
         });
-
         console.log("📝 Texto adicionado ao PDF!");
 
-        // Adicionar a logo na parte inferior
-        const logoPath = path.join(__dirname, "public/logo nome.png"); 
+        // Adicionar a logo na parte inferior, garantindo que ela não sobreponha as linhas
+        const logoPath = path.join(__dirname, "public/logo nome.png");
         console.log("📂 Verificando logo em:", logoPath);
-
         if (fs.existsSync(logoPath)) {
             console.log("✅ Logo encontrada! Embutindo no PDF...");
             const logoBytes = fs.readFileSync(logoPath);
             const logoImage = await pdfDoc.embedPng(logoBytes);
-
+            // Posicionar a logo dentro do bottomMargin
             page.drawImage(logoImage, {
                 x: 175,
-                y: 10,
+                y: 10,      // Certifique-se que esse Y está dentro da área reservada (10 + logo height <= bottomMargin)
                 width: 250,
                 height: 60,
             });
-
             console.log("🖼️ Logo adicionada ao PDF!");
         } else {
             console.log("⚠️ Logo não encontrada, pulando inserção.");
         }
 
         console.log("✅ PDF criado com sucesso!");
-
-        // Salvar o PDF em buffer
+        // Salvar e enviar o PDF
         const pdfBytes = await pdfDoc.save();
-
-        // Configurar resposta para download
         res.setHeader("Content-Disposition", 'attachment; filename="redacao.pdf"');
         res.setHeader("Content-Type", "application/pdf");
         res.send(Buffer.from(pdfBytes));
-
         console.log("📤 PDF enviado para o cliente!");
     } catch (error) {
         console.error("❌ Erro ao gerar PDF:", error);
@@ -140,3 +119,4 @@ router.post("/gerar-pdf", async (req, res) => {
 });
 
 export default router;
+// This code snippet creates a PDF file from text input and sends it back as a download response. It uses the pdf-lib library to generate the PDF document and express to handle the HTTP requests.
