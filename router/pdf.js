@@ -79,7 +79,7 @@ router.post("/gerar-pdf", async (req, res) => {
                 thickness: 1,
                 color: preto,
             });
-            linhaInicialY -= 25;
+            linhaInicialY -= 25; // Ajuste o espaçamento entre as linhas conforme necessário
         }
         console.log("📏 Linhas horizontais desenhadas!");
 
@@ -92,7 +92,7 @@ router.post("/gerar-pdf", async (req, res) => {
         linhasTexto.forEach((linha, index) => {
             page.drawText(linha, {
                 x: 55,
-                y: textoY - index * 25,
+                y: textoY - index * 25, // Ajuste o espaçamento entre as linhas conforme necessário
                 size: tamanhoFonte,
                 font: fonte,
                 color: preto,
@@ -113,7 +113,7 @@ router.post("/gerar-pdf", async (req, res) => {
             page.drawImage(logoImage, {
                 x: 175,
                 y: 10,
-                width: 200,
+                width: 250,
                 height: 60,
             });
 
