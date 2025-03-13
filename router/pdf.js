@@ -116,7 +116,7 @@ router.post("/gerar-pdf", async (req, res) => {
         // Desenhar o texto em cada linha com offset reduzido para posicionar mais acima
         linhasTexto.forEach((linha, index) => {
             // Ajuste o offset abaixo; sugiro 2px para mover o texto para cima
-            const y = pageHeight - topMargin - index * lineSpacing - 2;
+            const y = pageHeight - topMargin - index * lineSpacing;
             page.drawText(linha, {
                 x: 55,
                 y,
