@@ -88,6 +88,7 @@ router.post("/gerar-pdf", async (req, res) => {
         const bottomMargin = 70;               // Reserva para a logo
         // Calcular o espaçamento dinamicamente para ter 30 linhas
         const lineSpacing = (pageHeight - topMargin - bottomMargin) / totalLinhas;
+        const maxWidth = pageWidth - 100;      // Espaço para o texto (ajuste conforme necessário)
 
 
         // Calcular quantas linhas cabem na área útil
@@ -108,10 +109,7 @@ router.post("/gerar-pdf", async (req, res) => {
         console.log("📏 Linhas horizontais desenhadas!");
         
         // Processar o texto (já existente) e limitar a 30 linhas:
-        const tamanhoFonte = 12;
-        const linhaExata = "O iluminismo ou ilustração foi uma corrente de ideias que se originou no século XVIl e se desenvolveu mmm";
-        const computedMaxWidth = fonte.widthOfTextAtSize(linhaExata, tamanhoFonte);
-        const maxWidth = computedMaxWidth;
+        const tamanhoFonte = 8;
         let linhasTexto = processarTexto(texto, fonte, tamanhoFonte, maxWidth);
         linhasTexto = linhasTexto.slice(0, totalLinhas);
         
