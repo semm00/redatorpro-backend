@@ -9,6 +9,30 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
+function quebrarTexto(texto, fonte, tamanhoFonte, maxWidth) {
+    const linhas = [];
+    let palavras = texto.split(" ");
+    let linhaAtual = "";
+
+    for (let palavra of palavras) {
+        let linhaTeste = linhaAtual.length === 0 ? palavra : `${linhaAtual} ${palavra}`;
+        let larguraTexto = fonte.widthOfTextAtSize(linhaTeste, tamanhoFonte);
+
+        if (larguraTexto < maxWidth) {
+            linhaAtual = linhaTeste;
+        } else {
+            linhas.push(linhaAtual);
+            linhaAtual = palavra;
+        }
+    }
+
+    if (linhaAtual) {
+        linhas.push(linhaAtual);
+    }
+
+    return linhas;
+}
+
 router.post("/gerar-pdf", async (req, res) => {
     console.log("📩 Recebendo requisição para gerar PDF...");
 
@@ -60,14 +84,16 @@ router.post("/gerar-pdf", async (req, res) => {
         console.log("📏 Linhas horizontais desenhadas!");
 
         // Adicionar o texto dentro das linhas
-        const linhasTexto = texto.split("\n").slice(0, 30);
+        const tamanhoFonte = 12;
+        const maxWidth = 500;
+        const linhasTexto = quebrarTexto(texto, fonte, tamanhoFonte, maxWidth).slice(0, 30);
         let textoY = 755;
 
         linhasTexto.forEach((linha, index) => {
             page.drawText(linha, {
                 x: 55,
                 y: textoY - index * 25,
-                size: 12,
+                size: tamanhoFonte,
                 font: fonte,
                 color: preto,
             });
