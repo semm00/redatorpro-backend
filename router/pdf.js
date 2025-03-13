@@ -84,8 +84,8 @@ router.post("/gerar-pdf", async (req, res) => {
 
         // Configurar valores para as linhas
         const totalLinhas = 30;                // Número de linhas desejado
-        const topMargin = 30;                  // Reduzimos a margem superior para posicionar o texto mais acima
-        const bottomMargin = 80;               // Reserva para a logo
+        const topMargin = 40;                  // Reduzimos a margem superior para posicionar o texto mais acima
+        const bottomMargin = 70;               // Reserva para a logo
         // Calcular o espaçamento dinamicamente para ter 30 linhas
         const lineSpacing = (pageHeight - topMargin - bottomMargin) / totalLinhas;
         const maxWidth = pageWidth - 100;      // Espaço para o texto (ajuste conforme necessário)
@@ -116,7 +116,7 @@ router.post("/gerar-pdf", async (req, res) => {
         // Desenhar o texto em cada linha com offset reduzido para posicionar mais acima
         linhasTexto.forEach((linha, index) => {
             // Ajuste o offset abaixo; sugiro 2px para mover o texto para cima
-            const y = pageHeight - topMargin - index * lineSpacing + 4;
+            const y = pageHeight - topMargin - index * lineSpacing;
             page.drawText(linha, {
                 x: 55,
                 y,
