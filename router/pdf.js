@@ -71,7 +71,7 @@ router.post("/gerar-pdf", async (req, res) => {
         console.log("🎨 Fundo azul desenhado!");
 
         // Desenhar linhas horizontais
-        let linhaInicialY = 750;
+        let linhaInicialY = 770;
         for (let i = 0; i < 30; i++) {
             page.drawLine({
                 start: { x: 50, y: linhaInicialY },
@@ -111,10 +111,10 @@ router.post("/gerar-pdf", async (req, res) => {
             const logoImage = await pdfDoc.embedPng(logoBytes);
 
             page.drawImage(logoImage, {
-                x: 200,
-                y: 20,
+                x: 175,
+                y: 10,
                 width: 200,
-                height: 50,
+                height: 60,
             });
 
             console.log("🖼️ Logo adicionada ao PDF!");
