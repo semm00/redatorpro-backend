@@ -33,41 +33,6 @@ function quebrarTexto(texto, fonte, tamanhoFonte, maxWidth) {
     return linhas;
 }
 
-import express from "express";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const router = express.Router();
-
-function quebrarTexto(texto, fonte, tamanhoFonte, maxWidth) {
-    const linhas = [];
-    let palavras = texto.split(" ");
-    let linhaAtual = "";
-
-    for (let palavra of palavras) {
-        let linhaTeste = linhaAtual.length === 0 ? palavra : `${linhaAtual} ${palavra}`;
-        let larguraTexto = fonte.widthOfTextAtSize(linhaTeste, tamanhoFonte);
-
-        if (larguraTexto < maxWidth) {
-            linhaAtual = linhaTeste;
-        } else {
-            linhas.push(linhaAtual);
-            linhaAtual = palavra;
-        }
-    }
-
-    if (linhaAtual) {
-        linhas.push(linhaAtual);
-    }
-
-    return linhas;
-}
-
 router.post("/gerar-pdf", async (req, res) => {
     console.log("📩 Recebendo requisição para gerar PDF...");
 
