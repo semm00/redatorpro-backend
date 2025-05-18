@@ -8,11 +8,16 @@ datasource db {
 }
 
 model users {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
-  name     String
-  password String
-  essays   Essay[]
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  password     String
+  tipo         String   // "estudante" ou "corretor"
+  experiencia  String?  // só para corretor
+  escolaridade String?  // só para corretor
+  certificado  String?  // só para corretor (URL ou nome do arquivo)
+  aprovado     Boolean? @default(false) // só para corretor
+  essays       Essay[]
 }
 
 model Essay {

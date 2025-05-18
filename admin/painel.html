@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel de Aprovação de Corretores</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 20px; }
+    h1 { color: #246493; }
+    table { border-collapse: collapse; width: 100%; background: #fff; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background: #246493; color: #fff; }
+    tr:nth-child(even) { background: #f2f2f2; }
+    button { background: #65f66a; color: #246493; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; }
+    button:disabled { background: #ccc; color: #888; }
+    .link-cert { color: #246493; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>Corretores Pendentes de Aprovação</h1>
+  <table id="tabela">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Experiência</th>
+        <th>Escolaridade</th>
+        <th>Certificado</th>
+        <th>Aprovar</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Linhas serão inseridas via JS -->
+    </tbody>
+  </table>
+
+  <script>
+    async function carregarPendentes() {
+      const resposta = await fetch('/users/pendentes');
+      const lista = await resposta.json();
+      const tbody = document.querySelector('#tabela tbody');
+      tbody.innerHTML = '';
+      lista.forEach(user => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${user.name}</td>
+          <td>${user.email}</td>
+          <td>${user.experiencia || ''}</td>
+          <td>${user.escolaridade || ''}</td>
+          <td>
+            ${user.certificado ? `<a class="link-cert" href="${user.certificado}" target="_blank">Ver certificado</a>` : '—'}
+          </td>
+          <td>
+            <button onclick="aprovar(${user.id}, this)">Aprovar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function aprovar(id, btn) {
+      btn.disabled = true;
+      btn.textContent = 'Aprovando...';
+      const resposta = await fetch(`/users/${id}/aprovar`, { method: 'PATCH' });
+      if (resposta.ok) {
+        btn.textContent = 'Aprovado!';
+        btn.style.background = '#246493';
+        btn.style.color = '#fff';
+        setTimeout(carregarPendentes, 1000);
+      } else {
+        btn.textContent = 'Erro!';
+        btn.disabled = false;
+      }
+    }
+
+    carregarPendentes();
+  </script>
+</body>
+</html>
