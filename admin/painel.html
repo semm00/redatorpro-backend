@@ -26,6 +26,7 @@
         <th>Escolaridade</th>
         <th>Certificado</th>
         <th>Aprovar</th>
+        <th>Não Aprovar</th>
       </tr>
     </thead>
     <tbody>
@@ -52,6 +53,9 @@
           <td>
             <button onclick="aprovar(${user.id}, this)">Aprovar</button>
           </td>
+          <td>
+            <button style="background:#f66; color:#fff;" onclick="naoAprovar(${user.id}, this)">Não Aprovar</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
@@ -65,6 +69,20 @@
         btn.textContent = 'Aprovado!';
         btn.style.background = '#246493';
         btn.style.color = '#fff';
+        setTimeout(carregarPendentes, 1000);
+      } else {
+        btn.textContent = 'Erro!';
+        btn.disabled = false;
+      }
+    }
+
+    async function naoAprovar(id, btn) {
+      btn.disabled = true;
+      btn.textContent = 'Removendo...';
+      const resposta = await fetch(`/users/${id}/reprovar`, { method: 'PATCH' });
+      if (resposta.ok) {
+        btn.textContent = 'Removido!';
+        btn.style.background = '#888';
         setTimeout(carregarPendentes, 1000);
       } else {
         btn.textContent = 'Erro!';

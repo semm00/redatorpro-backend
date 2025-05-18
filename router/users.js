@@ -102,4 +102,15 @@ userRouter.get('/pendentes', async (req, res) => {
   }
 });
 
+userRouter.patch('/:id/reprovar', async (req, res) => {
+  try {
+    await prisma.users.delete({
+      where: { id: Number(req.params.id) }
+    });
+    res.json({ message: "Corretor removido com sucesso!" });
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao remover corretor." });
+  }
+});
+
 export default userRouter;

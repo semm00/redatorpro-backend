@@ -43,6 +43,7 @@ app.get('/', (req, res) => {
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/admin', express.static('admin'));
 app.use('/users', userRouter);
 app.use('/login', loginRouter);
 app.use('/server', serverRouter);
