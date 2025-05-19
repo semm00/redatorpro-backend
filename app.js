@@ -1,55 +1,58 @@
+// app.js
 import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
 import pgSession from 'connect-pg-simple';
+import dotenv from 'dotenv';
+
 import logger from './middlewares/logger.js';
 import userRouter from './router/users.js';
 import loginRouter from './router/login.js';
 import serverRouter from './router/server.js';
 import pdfRoutes from "./router/pdf.js";
-
-import dotenv from 'dotenv';
+import correcaoRouter from './router/correcao.js'; // <-- NOVA ROTA IMPORTADA
 
 dotenv.config();
+
 const app = express();
-app.set('trust proxy', 1);  // Confia no proxy (necessário no Render)
+app.set('trust proxy', 1); // Necessário para o Render usar cookies seguros
 
 const PgSession = pgSession(session);
 
+// Middlewares
 app.use(cors({
-  origin: 'https://ifpi-picos.github.io', // URL do front-end
+  origin: 'https://ifpi-picos.github.io',
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
 
-// Configurar o middleware de sessão com cookie cross-site
 app.use(session({
   store: new PgSession({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: true // Cria a tabela de sessões automaticamente se não existir
+    createTableIfMissing: true
   }),
-  secret: 'your-secret-key',  // substitua por uma chave segura
+  secret: 'your-secret-key', // Substitua por uma chave segura
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: true, sameSite: 'none' } // Necessário para HTTPS e cross-site
+  cookie: { secure: true, sameSite: 'none' }
 }));
 
 app.use(logger);
 
+// Rotas
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
-
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
 
 app.use('/admin', express.static('admin'));
 app.use('/users', userRouter);
 app.use('/login', loginRouter);
 app.use('/server', serverRouter);
-app.use("/pdf", pdfRoutes);
+app.use('/pdf', pdfRoutes);
+app.use('/correcao', correcaoRouter); // <-- ROTA ADICIONADA
 
-
+// Inicialização
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor online na porta ${PORT}`);
