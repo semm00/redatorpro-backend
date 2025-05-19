@@ -1,58 +1,55 @@
-// app.js
 import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
 import pgSession from 'connect-pg-simple';
-import dotenv from 'dotenv';
-
 import logger from './middlewares/logger.js';
 import userRouter from './router/users.js';
 import loginRouter from './router/login.js';
 import serverRouter from './router/server.js';
 import pdfRoutes from "./router/pdf.js";
-import correcaoRouter from './router/correcao.js'; // <-- NOVA ROTA IMPORTADA
+
+import dotenv from 'dotenv';
 
 dotenv.config();
-
 const app = express();
-app.set('trust proxy', 1); // Necessário para o Render usar cookies seguros
+app.set('trust proxy', 1);  // Confia no proxy (necessário no Render)
 
 const PgSession = pgSession(session);
 
-// Middlewares
 app.use(cors({
-  origin: 'https://ifpi-picos.github.io',
+  origin: 'https://ifpi-picos.github.io', // URL do front-end
   credentials: true,
 }));
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
+// Configurar o middleware de sessão com cookie cross-site
 app.use(session({
   store: new PgSession({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: true
+    createTableIfMissing: true // Cria a tabela de sessões automaticamente se não existir
   }),
-  secret: 'your-secret-key', // Substitua por uma chave segura
+  secret: 'your-secret-key',  // substitua por uma chave segura
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: true, sameSite: 'none' }
+  cookie: { secure: true, sameSite: 'none' } // Necessário para HTTPS e cross-site
 }));
 
 app.use(logger);
 
-// Rotas
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
+
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/admin', express.static('admin'));
 app.use('/users', userRouter);
 app.use('/login', loginRouter);
 app.use('/server', serverRouter);
-app.use('/pdf', pdfRoutes);
-app.use('/correcao', correcaoRouter); // <-- ROTA ADICIONADA
+app.use("/pdf", pdfRoutes);
 
-// Inicialização
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor online na porta ${PORT}`);
