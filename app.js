@@ -8,6 +8,8 @@ import loginRouter from './router/login.js';
 import serverRouter from './router/server.js';
 import pdfRoutes from "./router/pdf.js";
 import redchatRouter from './router/redchat.js';
+import geminiRouter from './router/gemini.js';
+
 
 import dotenv from 'dotenv';
 
@@ -50,6 +52,7 @@ app.use('/login', loginRouter);
 app.use('/server', serverRouter);
 app.use("/pdf", pdfRoutes);
 app.use('/redchat', redchatRouter);
+app.use('/gemini', geminiRouter);
 
 
 const PORT = process.env.PORT || 3000;

@@ -1,16 +1,14 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.post('/', async (req, res) => {
-  const { tipoCorrecao, tema, texto } = req.body;
+  const { texto, tipoCorrecao } = req.body;
 
-  if (!req.session.user) {
-    return res.status(401).json({ error: 'Usuário não autenticado.' });
+  if (!texto || !tipoCorrecao) {
+    return res.status(400).json({ erro: 'Texto e tipo de correção são obrigatórios.' });
   }
 
   try {
@@ -29,28 +27,10 @@ ${texto}
     const response = await result.response;
     const correcao = response.text();
 
-    // (Opcional) Extrair a nota do texto da IA usando regex
-    const notaMatch = correcao.match(/nota\s*[:=]?\s*(\d{1,4})/i);
-    const nota = notaMatch ? Number(notaMatch[1]) : null;
-
-    // Salva no banco de dados
-    const essay = await prisma.essay.create({
-      data: {
-        text: texto,
-        urlImage: null,
-        authorId: req.session.user.id,
-        corrigidaPor: "ia",
-        correcaoIa: correcao,
-        tipoCorrecao,
-        tema,
-        notaTotal: nota
-      }
-    });
-
-    res.json({ correcao, nota, essay });
+    res.json({ correcao });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erro ao processar a redação.' });
+    res.status(500).json({ erro: 'Erro ao consultar a Gemini' });
   }
 });
 
