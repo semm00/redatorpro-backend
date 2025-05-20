@@ -143,11 +143,19 @@ ${texto}
     const response = await result.response;
     const correcao = response.text();
 
-    // Extrair a nota do texto da IA usando regex
-    const notaMatch = correcao.match(/nota\s*[:=]?\s*(\d{2,4})/i);
-    const nota = notaMatch ? Number(notaMatch[1]) : null;
+    // LOG para depuração
+    console.log('Texto da correção:', correcao);
 
-    // Salva no banco de dados
+    // Regex robusto para pegar a nota final (mesmo com espaços, quebras de linha, etc)
+    const notaMatch =
+      correcao.match(/nota\s*final[^0-9]{0,10}(\d{2,4})/i) ||
+      correcao.match(/nota[^0-9]{0,10}(\d{2,4})/i);
+
+    console.log('Resultado do regex da nota:', notaMatch);
+
+    const nota = notaMatch ? Number(notaMatch[1]) : null;
+    console.log('Nota extraída:', nota);
+
     const essay = await prisma.essay.create({
       data: {
         text: texto,
@@ -157,10 +165,9 @@ ${texto}
         correcaoIa: correcao,
         tipoCorrecao,
         tema,
-        notaTotal: nota
+        notaTotal: nota // <-- Salva a nota extraída!
       }
     });
-
     res.json({ correcao, nota, essay });
   } catch (err) {
     console.error(err);
