@@ -21,9 +21,14 @@ model users {
 }
 
 model Essay {
-  id       Int      @id @default(autoincrement())
-  text     String?
-  urlImage String?
-  author   users    @relation(fields: [authorId], references: [id])
-  authorId Int
+  id           Int      @id @default(autoincrement())
+  text         String?
+  urlImage     String?
+  author       users    @relation(fields: [authorId], references: [id])
+  authorId     Int
+  corrigidaPor String?  // "ia" ou "corretor"
+  correcaoIa   String?  // resposta da IA, se houver
+  tipoCorrecao String?  // tipo de correção (opcional)
+  tema         String?  // tema da redação (opcional)
+  createdAt    DateTime @default(now())
 }
