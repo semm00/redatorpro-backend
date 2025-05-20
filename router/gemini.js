@@ -13,7 +13,7 @@ router.post('/', async (req, res) => {
 
   // Prompt personalizado conforme o tipo de correção
   let prompt = '';
-  if (tipoCorrecao === 'enem') {
+  if (tipoCorrecao === 'ENEM') {
     prompt = `
 Corrija esta redação conforme os critérios oficiais do ENEM, atribuindo notas de 0 a 200 para cada uma das cinco competências e uma nota final. Siga esta estrutura:
 
@@ -47,7 +47,7 @@ Ofereça recomendações específicas para elevar a nota em cada competência.
 Texto para correção:
 ${texto}
 `;
-  } else if (tipoCorrecao === 'fcc') {
+  } else if (tipoCorrecao === 'FCC') {
     prompt = `
 Prompt para Correção de Redação – Padrão FCC (Fundação Carlos Chagas)
 Instruções para o Corretor:
@@ -88,7 +88,7 @@ Sugestões de melhoria: Recomendações específicas (ex.: aprofundar um argumen
 Texto para correção:
 ${texto}
 `;
-  } else if (tipoCorrecao === 'fuvest') {
+  } else if (tipoCorrecao === 'Fuvest') {
     prompt = `
 Corrija a redação abaixo conforme os critérios oficiais da FUVEST, atribuindo nota de 10 a 50 pontos. Siga esta estrutura:
 
