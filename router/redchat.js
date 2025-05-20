@@ -7,9 +7,11 @@ const prisma = new PrismaClient();
 
 // Rota para receber redação, enviar para IA e salvar no banco
 router.post('/', async (req, res) => {
-  const { tipoCorrecao, tema, texto, userId } = req.body;
-  if (!texto || !userId) {
-    return res.status(400).json({ error: 'Dados obrigatórios faltando.' });
+  const { tipoCorrecao, tema, texto } = req.body;
+
+  // Verifica se o usuário está autenticado via sessão
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Usuário não autenticado.' });
   }
 
   try {
@@ -20,8 +22,6 @@ router.post('/', async (req, res) => {
       { headers: { Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}` } }
     );
     const correcao = iaResponse.data[0]?.generated_text || "Sem resposta da IA";
-
-    // Exemplo: se a IA retornar a nota em iaResponse.data[0].nota
     const nota = iaResponse.data[0]?.nota || null;
 
     // Salva no banco de dados
@@ -29,7 +29,7 @@ router.post('/', async (req, res) => {
       data: {
         text: texto,
         urlImage: null,
-        authorId: userId,
+        authorId: req.session.user.id, // Usa o ID do usuário logado na sessão
         corrigidaPor: "ia",
         correcaoIa: correcao,
         tipoCorrecao,
