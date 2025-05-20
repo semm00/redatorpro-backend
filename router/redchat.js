@@ -13,8 +13,7 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    // Exemplo de chamada para IA (substitua pela sua IA real)
-    // Aqui está um exemplo usando HuggingFace, mas pode ser OpenAI ou outra
+    // Chamada para IA (exemplo HuggingFace)
     const iaResponse = await axios.post(
       'https://api-inference.huggingface.co/models/pszemraj/grammar-correction',
       { inputs: texto },
@@ -22,16 +21,24 @@ router.post('/', async (req, res) => {
     );
     const correcao = iaResponse.data[0]?.generated_text || "Sem resposta da IA";
 
+    // Exemplo: se a IA retornar a nota em iaResponse.data[0].nota
+    const nota = iaResponse.data[0]?.nota || null;
+
     // Salva no banco de dados
     const essay = await prisma.essay.create({
       data: {
         text: texto,
         urlImage: null,
-        authorId: userId
+        authorId: userId,
+        corrigidaPor: "ia",
+        correcaoIa: correcao,
+        tipoCorrecao,
+        tema,
+        notaTotal: nota
       }
     });
 
-    res.json({ correcao, essay });
+    res.json({ correcao, nota, essay });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao processar a redação.' });

@@ -31,4 +31,5 @@ model Essay {
   tipoCorrecao String?  // tipo de correção (opcional)
   tema         String?  // tema da redação (opcional)
   createdAt    DateTime @default(now())
+  notaTotal    Float?   // <-- campo para a nota total
 }
