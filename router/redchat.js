@@ -30,7 +30,7 @@ ${texto}
     const correcao = response.text();
 
     // (Opcional) Extrair a nota do texto da IA usando regex
-    const notaMatch = correcao.match(/nota\s*[:=]?\s*(\d{1,4})/i);
+    const notaMatch = correcao.match(/nota\s*[:=]?\s*(\d{2,4})/i);
     const nota = notaMatch ? Number(notaMatch[1]) : null;
 
     // Salva no banco de dados
