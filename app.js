@@ -9,6 +9,7 @@ import serverRouter from './router/server.js';
 import pdfRoutes from "./router/pdf.js";
 import redchatRouter from './router/redchat.js';
 import geminiRouter from './router/gemini.js';
+import redacoesRouter from './router/redacoes.js';
 
 
 import dotenv from 'dotenv';
@@ -53,6 +54,7 @@ app.use('/server', serverRouter);
 app.use("/pdf", pdfRoutes);
 app.use('/redchat', redchatRouter);
 app.use('/gemini', geminiRouter);
+app.use('/redacoes', redacoesRouter);
 
 
 const PORT = process.env.PORT || 3000;
