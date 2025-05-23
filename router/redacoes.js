@@ -4,14 +4,16 @@ import { PrismaClient } from '@prisma/client';
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Busca todas as redações (público)
+// Busca apenas as redações do usuário autenticado
 router.get('/', async (req, res) => {
-  console.log('[redacoes.js] Requisição GET /redacoes recebida');
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Usuário não autenticado.' });
+  }
   try {
     const redacoes = await prisma.essay.findMany({
+      where: { authorId: req.session.user.id },
       orderBy: { createdAt: 'desc' }
     });
-    console.log('[redacoes.js] Redações encontradas:', redacoes.length);
     res.json(redacoes);
   } catch (err) {
     console.error('[redacoes.js] Erro ao buscar redações:', err);
