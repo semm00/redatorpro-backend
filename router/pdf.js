@@ -68,7 +68,7 @@ router.post("/gerar-pdf", async (req, res) => {
         // Fonte
         const fonte = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const preto = rgb(0, 0, 0);
-        const tamanhoFonte = 15;
+        const tamanhoFonte = 14;
 
         // Título centralizado
         const titulo = "Folha de Redação";
@@ -97,14 +97,15 @@ router.post("/gerar-pdf", async (req, res) => {
 
         // Desenha o texto, linha a linha, igual ao textarea
         for (let i = 0; i < linhasTexto.length && i < totalLinhas; i++) {
-            const y = pageHeight - marginTop - i * lineSpacing + 5;
+            // Centraliza verticalmente: metade da diferença entre lineSpacing e tamanhoFonte
+            const verticalOffset = (lineSpacing - tamanhoFonte) / 2;
+            const y = pageHeight - marginTop - i * lineSpacing - verticalOffset;
             page.drawText(linhasTexto[i], {
                 x: marginX + 3,
                 y,
                 size: tamanhoFonte,
                 font: fonte,
                 color: preto,
-                // Não use maxWidth para não quebrar a linha automaticamente
             });
         }
 
