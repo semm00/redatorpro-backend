@@ -96,18 +96,19 @@ router.post("/gerar-pdf", async (req, res) => {
         let linhasTexto = linhasTextareaParaPDF(texto, totalLinhas);
 
         // Desenha o texto, linha a linha, igual ao textarea
+       
         for (let i = 0; i < linhasTexto.length && i < totalLinhas; i++) {
-            // Centraliza verticalmente: metade da diferença entre lineSpacing e tamanhoFonte
-            const verticalOffset = (lineSpacing - tamanhoFonte) / 2;
-            const y = pageHeight - marginTop - i * lineSpacing - verticalOffset;
-            page.drawText(linhasTexto[i], {
-                x: marginX + 3,
-                y,
-                size: tamanhoFonte,
-                font: fonte,
-                color: preto,
-            });
-        }
+        const y = pageHeight - marginTop - i * lineSpacing + 5;
+        const larguraLinha = fonte.widthOfTextAtSize(linhasTexto[i], tamanhoFonte);
+        const x = marginX + ((maxWidth - larguraLinha) / 2); // Centraliza horizontalmente
+        page.drawText(linhasTexto[i], {
+            x,
+            y,
+            size: tamanhoFonte,
+            font: fonte,
+            color: preto,
+        });
+    }
 
         // Logo centralizada e com proporção melhor
         const logoPath = path.join(__dirname, "public/logo nome.png");
