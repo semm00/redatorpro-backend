@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// Função para quebrar texto em linhas completas, respeitando parágrafos
+// Função para quebrar texto em linhas completas, respeitando parágrafos e evitando sobreposição de palavras
 function quebrarTextoPorLinhaParagrafos(texto, fonte, tamanhoFonte, maxWidth, maxLinhas) {
     // Divide em parágrafos
     const paragrafos = texto.split(/\r?\n\r?\n/);
@@ -17,18 +17,36 @@ function quebrarTextoPorLinhaParagrafos(texto, fonte, tamanhoFonte, maxWidth, ma
     for (let p = 0; p < paragrafos.length; p++) {
         let paragrafo = paragrafos[p].replace(/\r?\n/g, " ").trim();
         if (!paragrafo) {
-            // Se for parágrafo vazio, adiciona uma linha em branco
             linhas.push("");
             continue;
         }
         const palavras = paragrafo.split(/\s+/);
         let linhaAtual = "";
-        for (const palavra of palavras) {
-            let testeLinha = linhaAtual.length === 0 ? palavra : linhaAtual + " " + palavra;
+        for (let i = 0; i < palavras.length; i++) {
+            let palavra = palavras[i];
+            // Se a palavra sozinha já é maior que a linha, quebra a palavra
+            let palavraRestante = palavra;
+            while (fonte.widthOfTextAtSize(palavraRestante, tamanhoFonte) > maxWidth) {
+                // Encontra o maior pedaço que cabe
+                let corte = palavraRestante.length;
+                while (corte > 1 && fonte.widthOfTextAtSize(palavraRestante.slice(0, corte), tamanhoFonte) > maxWidth) {
+                    corte--;
+                }
+                if (corte <= 1) break;
+                let parte = palavraRestante.slice(0, corte);
+                palavraRestante = palavraRestante.slice(corte);
+                if (linhaAtual.length > 0) {
+                    linhas.push(linhaAtual);
+                    linhaAtual = "";
+                }
+                linhas.push(parte);
+            }
+            if (palavraRestante.length === 0) continue;
+            let testeLinha = linhaAtual.length === 0 ? palavraRestante : linhaAtual + " " + palavraRestante;
             const largura = fonte.widthOfTextAtSize(testeLinha, tamanhoFonte);
             if (largura > maxWidth && linhaAtual !== "") {
                 linhas.push(linhaAtual);
-                linhaAtual = palavra;
+                linhaAtual = palavraRestante;
             } else {
                 linhaAtual = testeLinha;
             }
@@ -114,7 +132,7 @@ router.post("/gerar-pdf", async (req, res) => {
             });
         }
 
-        // Processa o texto para preencher cada linha ao máximo, respeitando parágrafos
+        // Processa o texto para preencher cada linha ao máximo, respeitando parágrafos e evitando sobreposição
         let linhasTexto = quebrarTextoPorLinhaParagrafos(texto, fonte, tamanhoFonte, maxWidth, totalLinhas);
 
         // Desenha o texto, preenchendo cada linha ao máximo
