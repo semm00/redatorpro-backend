@@ -68,7 +68,7 @@ router.post("/gerar-pdf", async (req, res) => {
         // Fonte
         const fonte = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const preto = rgb(0, 0, 0);
-        const tamanhoFonte = 14;
+        const tamanhoFonte = 15;
 
         // Título centralizado
         const titulo = "Folha de Redação";
