@@ -20,6 +20,8 @@ router.post('/', async (req, res) => {
   let prompt = '';
   if (tipo === 'enem') {
     prompt = `
+    Texto para correção (Tema: ${tema}):
+    ${texto}
 Avalie esta redação conforme os critérios oficiais do ENEM, atribuindo notas de 0 a 200 para cada uma das cinco competências e uma nota final. Siga esta estrutura:
 
 Análise Detalhada por Competência:
@@ -54,6 +56,8 @@ ${texto}
 `;
   } else if (tipo === 'concursos') {
     prompt = `
+    Texto para correção (Tema: ${tema}):
+    ${texto}
 Analise a redação abaixo conforme os critérios oficiais da FCC, que avalia dissertações argumentativas em três eixos principais: Conteúdo (40 pontos), Estrutura (30 pontos) e Expressão (30 pontos). A nota total é de 100 pontos.
 
 Critérios de Correção Detalhados
@@ -93,6 +97,8 @@ ${texto}
 `;
   } else if (tipo === 'fuvest') {
     prompt = `
+    Texto para correção (Tema: ${tema}):
+    ${texto}
 Avalie a redação abaixo conforme os critérios oficiais da FUVEST, atribuindo nota de 10 a 50 pontos. Siga esta estrutura:
 
 Critérios de Avaliação:
