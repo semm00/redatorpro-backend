@@ -168,7 +168,8 @@ ${texto}
         notaTotal: nota // <-- Salva a nota extraída!
       }
     });
-    res.json({ correcao, nota, essay });
+    // Inclui o texto original na resposta
+    res.json({ correcao, nota, essay, texto });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao processar a redação.' });
