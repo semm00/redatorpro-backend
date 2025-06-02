@@ -208,7 +208,7 @@ ${texto}
 
     const essay = await prisma.essay.create({
       data: {
-        text: texto,
+        text: texto && texto.trim() ? texto : null, // <-- Corrige aqui
         urlImage: urlImage,
         authorId: req.session.user.id,
         corrigidaPor: "ia",
@@ -221,7 +221,7 @@ ${texto}
     // Inclui o texto original e a url da imagem na resposta
     res.json({ correcao, nota, essay, texto, urlImage });
   } catch (err) {
-    console.error(err);
+    console.error("Erro ao processar a redação:", err); // <-- log detalhado
     res.status(500).json({ error: 'Erro ao processar a redação.' });
   }
 });
