@@ -12,9 +12,26 @@ router.get('/', async (req, res) => {
   try {
     const redacoes = await prisma.essay.findMany({
       where: { authorId: req.session.user.id },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        tema: true,
+        nota: true,
+        texto: true,
+        imagem: true,
+        createdAt: true,
+      },
     });
-    res.json(redacoes);
+
+    // Adiciona lógica para gerar prévia e evitar "Redação enviada como imagem" para textos
+    const redacoesComPrevia = redacoes.map((redacao) => ({
+      ...redacao,
+      preview: redacao.texto
+        ? redacao.texto.slice(0, 100) + (redacao.texto.length > 100 ? '...' : '')
+        : 'Redação enviada como imagem.',
+    }));
+
+    res.json(redacoesComPrevia);
   } catch (err) {
     console.error('[redacoes.js] Erro ao buscar redações:', err);
     res.status(500).json({ error: 'Erro ao buscar redações.' });
