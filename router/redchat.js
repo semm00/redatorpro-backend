@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import multer from 'multer';
 import { createClient } from '@supabase/supabase-js';
+import axios from 'axios'; // Adicione esta linha no topo
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -160,6 +161,7 @@ ${texto}
 
   // Upload da imagem para o Supabase, se houver
   let urlImage = null;
+  let geminiImagePart = null;
   if (file) {
     try {
       const filePath = `${Date.now()}_${file.originalname}`;
@@ -168,8 +170,19 @@ ${texto}
         .upload(filePath, file.buffer, { contentType: file.mimetype });
       if (error) throw error;
       urlImage = supabase.storage.from("redator").getPublicUrl(filePath).data.publicUrl;
+
+      // Baixa a imagem do Supabase para obter o buffer
+      const response = await axios.get(urlImage, { responseType: 'arraybuffer' });
+      const buffer = Buffer.from(response.data, 'binary');
+      const base64 = buffer.toString('base64');
+      geminiImagePart = {
+        inlineData: {
+          data: base64,
+          mimeType: file.mimetype
+        }
+      };
     } catch (err) {
-      console.error("Erro ao enviar imagem para o Supabase:", err.message);
+      console.error("Erro ao enviar imagem para o Supabase ou preparar imagem para Gemini:", err.message);
       return res.status(500).json({ error: "Erro ao enviar imagem." });
     }
   }
@@ -177,11 +190,11 @@ ${texto}
   try {
     // Monta entrada para Gemini (texto ou multimodal)
     let geminiInput;
-    if (urlImage) {
-      // Entrada multimodal: imagem + prompt
+    if (geminiImagePart) {
+      // Entrada multimodal: prompt + imagem (base64)
       geminiInput = [
         { text: prompt },
-        { image: { url: urlImage } }
+        geminiImagePart
       ];
     } else {
       geminiInput = prompt;
