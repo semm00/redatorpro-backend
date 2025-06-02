@@ -164,7 +164,9 @@ ${texto}
   let geminiImagePart = null;
   if (file) {
     try {
-      const filePath = `${Date.now()}_${file.originalname}`;
+      // Sanitiza o nome do arquivo para evitar caracteres inválidos no Supabase
+      const originalName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+      const filePath = `${Date.now()}_${originalName}`;
       const { error } = await supabase.storage
         .from("redator")
         .upload(filePath, file.buffer, { contentType: file.mimetype });
