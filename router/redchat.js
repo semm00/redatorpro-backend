@@ -1,16 +1,32 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import multer from 'multer';
+import { createClient } from '@supabase/supabase-js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-router.post('/', async (req, res) => {
+// Configuração do Supabase
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Configuração do multer para upload de imagem
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.post('/', upload.single('imagem'), async (req, res) => {
   const { tipoCorrecao, tema, texto } = req.body;
+  const file = req.file;
 
   if (!req.session.user) {
     return res.status(401).json({ error: 'Usuário não autenticado.' });
+  }
+
+  // Impede envio de texto e imagem juntos
+  if ((file && texto && texto.trim()) || (!file && (!texto || !texto.trim()))) {
+    return res.status(400).json({ error: 'Envie apenas o texto digitado OU apenas a imagem da redação.' });
   }
 
   // Padroniza o tipo de correção para minúsculo
@@ -142,10 +158,38 @@ ${texto}
 `;
   }
 
+  // Upload da imagem para o Supabase, se houver
+  let urlImage = null;
+  if (file) {
+    try {
+      const filePath = `${Date.now()}_${file.originalname}`;
+      const { error } = await supabase.storage
+        .from("redator")
+        .upload(filePath, file.buffer, { contentType: file.mimetype });
+      if (error) throw error;
+      urlImage = supabase.storage.from("redator").getPublicUrl(filePath).data.publicUrl;
+    } catch (err) {
+      console.error("Erro ao enviar imagem para o Supabase:", err.message);
+      return res.status(500).json({ error: "Erro ao enviar imagem." });
+    }
+  }
+
   try {
+    // Monta entrada para Gemini (texto ou multimodal)
+    let geminiInput;
+    if (urlImage) {
+      // Entrada multimodal: imagem + prompt
+      geminiInput = [
+        { text: prompt },
+        { image: { url: urlImage } }
+      ];
+    } else {
+      geminiInput = prompt;
+    }
+
     // Usa o modelo Gemini 1.5 Flash
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(geminiInput);
     const response = await result.response;
     const correcao = response.text();
 
@@ -165,17 +209,17 @@ ${texto}
     const essay = await prisma.essay.create({
       data: {
         text: texto,
-        urlImage: null,
+        urlImage: urlImage,
         authorId: req.session.user.id,
         corrigidaPor: "ia",
         correcaoIa: correcao,
         tipoCorrecao,
         tema,
-        notaTotal: nota // <-- Salva a nota extraída!
+        notaTotal: nota
       }
     });
-    // Inclui o texto original na resposta
-    res.json({ correcao, nota, essay, texto });
+    // Inclui o texto original e a url da imagem na resposta
+    res.json({ correcao, nota, essay, texto, urlImage });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao processar a redação.' });
