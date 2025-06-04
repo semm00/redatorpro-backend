@@ -20,12 +20,14 @@ function linhasTextareaParaPDF(texto, maxLinhas, fonte, tamanhoFonte, maxWidth) 
         while (working.length > 0) {
             let corte = working.length;
             let sub = working;
+            // Evita medir string vazia
+            if (!sub) break;
             // Reduz até caber na largura
-            while (fonte.widthOfTextAtSize(sub, tamanhoFonte) > maxWidth && corte > 0) {
+            while (sub && fonte.widthOfTextAtSize(sub, tamanhoFonte) > maxWidth && corte > 0) {
                 corte--;
                 sub = working.slice(0, corte);
             }
-            if (corte === 0) break; // Evita loop infinito
+            if (!sub || corte === 0) break; // Evita loop infinito
             linhasFinal.push(sub);
             working = working.slice(corte);
         }
@@ -45,7 +47,7 @@ function linhasTextareaParaPDF(texto, maxLinhas, fonte, tamanhoFonte, maxWidth) 
 router.post("/gerar-pdf", async (req, res) => {
     try {
         const { texto } = req.body;
-        if (!texto || texto.trim() === "") {
+        if (!texto || typeof texto !== "string" || texto.trim() === "") {
             return res.status(400).json({ error: "Texto não pode estar vazio" });
         }
 
@@ -111,7 +113,12 @@ router.post("/gerar-pdf", async (req, res) => {
         }
 
         // Gera as linhas do PDF quebrando conforme largura
-        let linhasTexto = linhasTextareaParaPDF(texto, totalLinhas, fonte, tamanhoFonte, maxWidth);
+        let linhasTexto;
+        try {
+            linhasTexto = linhasTextareaParaPDF(texto, totalLinhas, fonte, tamanhoFonte, maxWidth);
+        } catch (err) {
+            return res.status(500).json({ error: "Erro ao processar linhas do texto", detalhe: err.message });
+        }
 
         // Desenha o texto, linha a linha, igual ao textarea (com quebra)
         for (let i = 0; i < linhasTexto.length && i < totalLinhas; i++) {
@@ -155,7 +162,7 @@ router.post("/gerar-pdf", async (req, res) => {
         res.setHeader("Content-Type", "application/pdf");
         res.send(Buffer.from(pdfBytes));
     } catch (error) {
-        res.status(500).json({ error: "Erro ao gerar PDF" });
+        res.status(500).json({ error: "Erro ao gerar PDF", detalhe: error.message });
     }
 });
 
