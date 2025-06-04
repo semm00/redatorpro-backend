@@ -21,7 +21,8 @@ function linhasTextareaParaPDF(texto, maxLinhas) {
     while (linhas.length < maxLinhas) {
         linhas.push('');
     }
-    return linhas;
+    // Mantém espaços em branco no início e fim de cada linha
+    return linhas.map(l => l.replace(/ /g, '\u00A0'));
 }
 
 router.post("/gerar-pdf", async (req, res) => {
@@ -97,10 +98,11 @@ router.post("/gerar-pdf", async (req, res) => {
 
         // Desenha o texto, linha a linha, igual ao textarea
         for (let i = 0; i < linhasTexto.length && i < totalLinhas; i++) {
-            const y = pageHeight - marginTop - i * lineSpacing + 5;
-            // Respeita espaços em branco no início/fim e linhas em branco
-            const linha = linhasTexto[i].replace(/\s+$/g, "\u00A0"); // Mantém espaços finais visíveis
-            page.drawText(linha.length === 0 ? "\u00A0" : linha, {
+            // Ajuste: alinhar o texto exatamente sobre a linha
+            const y = pageHeight - marginTop - i * lineSpacing + 2; // +2 para alinhar melhor
+            // Mantém espaços em branco e linhas vazias
+            const linha = linhasTexto[i].length === 0 ? "\u00A0" : linhasTexto[i];
+            page.drawText(linha, {
                 x: marginX + 3,
                 y,
                 size: tamanhoFonte,
