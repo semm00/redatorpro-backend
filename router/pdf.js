@@ -11,43 +11,45 @@ const router = express.Router();
 
 // Função para quebrar linhas do textarea para caber no PDF
 function linhasTextareaParaPDF(texto, maxLinhas, fonte, tamanhoFonte, maxWidth) {
+    // LOG para debug
+    console.log("[linhasTextareaParaPDF] texto recebido:", JSON.stringify(texto));
     const linhasOriginais = texto.split('\n');
     let linhasFinal = [];
     for (let linha of linhasOriginais) {
-        // Mantém espaços em branco no início/fim
         let working = linha.replace(/ /g, '\u00A0');
-        // Quebra a linha se for maior que o maxWidth
         while (working.length > 0) {
             let corte = working.length;
             let sub = working;
-            // Evita medir string vazia
             if (!sub) break;
-            // Reduz até caber na largura
+            // LOG para debug
+            // console.log("[linhasTextareaParaPDF] sub:", sub, "corte:", corte);
             while (sub && fonte.widthOfTextAtSize(sub, tamanhoFonte) > maxWidth && corte > 0) {
                 corte--;
                 sub = working.slice(0, corte);
             }
-            if (!sub || corte === 0) break; // Evita loop infinito
+            if (!sub || corte === 0) break;
             linhasFinal.push(sub);
             working = working.slice(corte);
         }
-        if (linha === "") linhasFinal.push(""); // Garante linhas em branco
+        if (linha === "") linhasFinal.push("");
     }
-    // Limita ao máximo de linhas
     if (linhasFinal.length > maxLinhas) {
         linhasFinal = linhasFinal.slice(0, maxLinhas);
     }
-    // Preenche linhas vazias se necessário
     while (linhasFinal.length < maxLinhas) {
         linhasFinal.push("");
     }
+    // LOG para debug
+    console.log("[linhasTextareaParaPDF] linhasFinal:", linhasFinal);
     return linhasFinal;
 }
 
 router.post("/gerar-pdf", async (req, res) => {
     try {
         const { texto } = req.body;
+        console.log("[/gerar-pdf] texto recebido:", JSON.stringify(texto));
         if (!texto || typeof texto !== "string" || texto.trim() === "") {
+            console.log("[/gerar-pdf] Texto inválido:", texto);
             return res.status(400).json({ error: "Texto não pode estar vazio" });
         }
 
@@ -117,8 +119,12 @@ router.post("/gerar-pdf", async (req, res) => {
         try {
             linhasTexto = linhasTextareaParaPDF(texto, totalLinhas, fonte, tamanhoFonte, maxWidth);
         } catch (err) {
+            console.error("[/gerar-pdf] Erro ao processar linhas do texto:", err);
             return res.status(500).json({ error: "Erro ao processar linhas do texto", detalhe: err.message });
         }
+
+        // LOG para debug
+        console.log("[/gerar-pdf] linhasTexto final:", linhasTexto);
 
         // Desenha o texto, linha a linha, igual ao textarea (com quebra)
         for (let i = 0; i < linhasTexto.length && i < totalLinhas; i++) {
@@ -136,17 +142,22 @@ router.post("/gerar-pdf", async (req, res) => {
         // Logo centralizada e com proporção melhor
         const logoPath = path.join(__dirname, "public/logo nome.png");
         if (fs.existsSync(logoPath)) {
-            const logoBytes = fs.readFileSync(logoPath);
-            const logoImage = await pdfDoc.embedPng(logoBytes);
-            // Mantém proporção da logo
-            const logoWidth = 180;
-            const logoHeight = (logoImage.height / logoImage.width) * logoWidth;
-            page.drawImage(logoImage, {
-                x: (pageWidth - logoWidth) / 2,
-                y: 20,
-                width: logoWidth,
-                height: logoHeight,
-            });
+            try {
+                const logoBytes = fs.readFileSync(logoPath);
+                const logoImage = await pdfDoc.embedPng(logoBytes);
+                const logoWidth = 180;
+                const logoHeight = (logoImage.height / logoImage.width) * logoWidth;
+                page.drawImage(logoImage, {
+                    x: (pageWidth - logoWidth) / 2,
+                    y: 20,
+                    width: logoWidth,
+                    height: logoHeight,
+                });
+            } catch (logoErr) {
+                console.error("[/gerar-pdf] Erro ao inserir logo:", logoErr);
+            }
+        } else {
+            console.log("[/gerar-pdf] Logo não encontrada em:", logoPath);
         }
 
         // Rodapé decorativo
@@ -161,7 +172,9 @@ router.post("/gerar-pdf", async (req, res) => {
         res.setHeader("Content-Disposition", 'attachment; filename="redacao.pdf"');
         res.setHeader("Content-Type", "application/pdf");
         res.send(Buffer.from(pdfBytes));
+        console.log("[/gerar-pdf] PDF gerado e enviado com sucesso!");
     } catch (error) {
+        console.error("[/gerar-pdf] Erro geral:", error);
         res.status(500).json({ error: "Erro ao gerar PDF", detalhe: error.message });
     }
 });
