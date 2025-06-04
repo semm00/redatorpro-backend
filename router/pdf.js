@@ -11,8 +11,10 @@ const router = express.Router();
 
 // Função para quebrar linhas do textarea para caber no PDF
 function linhasTextareaParaPDF(texto, maxLinhas, fonte, tamanhoFonte, maxWidth) {
+    // Remove todos os \r (carriage return) para evitar erro de encoding do pdf-lib
+    texto = texto.replace(/\r/g, "");
     // LOG para debug
-    console.log("[linhasTextareaParaPDF] texto recebido:", JSON.stringify(texto));
+    console.log("[linhasTextareaParaPDF] texto limpo:", JSON.stringify(texto));
     const linhasOriginais = texto.split('\n');
     let linhasFinal = [];
     for (let linha of linhasOriginais) {
@@ -21,8 +23,6 @@ function linhasTextareaParaPDF(texto, maxLinhas, fonte, tamanhoFonte, maxWidth) 
             let corte = working.length;
             let sub = working;
             if (!sub) break;
-            // LOG para debug
-            // console.log("[linhasTextareaParaPDF] sub:", sub, "corte:", corte);
             while (sub && fonte.widthOfTextAtSize(sub, tamanhoFonte) > maxWidth && corte > 0) {
                 corte--;
                 sub = working.slice(0, corte);
