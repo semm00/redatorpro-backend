@@ -9,20 +9,37 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// Função para garantir que cada linha do PDF seja igual à linha do textarea
-function linhasTextareaParaPDF(texto, maxLinhas) {
-    // Divide exatamente como está no textarea
-    let linhas = texto.split('\n');
-    // Garante o número máximo de linhas
-    if (linhas.length > maxLinhas) {
-        linhas = linhas.slice(0, maxLinhas);
+// Função para quebrar linhas do textarea para caber no PDF
+function linhasTextareaParaPDF(texto, maxLinhas, fonte, tamanhoFonte, maxWidth) {
+    const linhasOriginais = texto.split('\n');
+    let linhasFinal = [];
+    for (let linha of linhasOriginais) {
+        // Mantém espaços em branco no início/fim
+        let working = linha.replace(/ /g, '\u00A0');
+        // Quebra a linha se for maior que o maxWidth
+        while (working.length > 0) {
+            let corte = working.length;
+            let sub = working;
+            // Reduz até caber na largura
+            while (fonte.widthOfTextAtSize(sub, tamanhoFonte) > maxWidth && corte > 0) {
+                corte--;
+                sub = working.slice(0, corte);
+            }
+            if (corte === 0) break; // Evita loop infinito
+            linhasFinal.push(sub);
+            working = working.slice(corte);
+        }
+        if (linha === "") linhasFinal.push(""); // Garante linhas em branco
+    }
+    // Limita ao máximo de linhas
+    if (linhasFinal.length > maxLinhas) {
+        linhasFinal = linhasFinal.slice(0, maxLinhas);
     }
     // Preenche linhas vazias se necessário
-    while (linhas.length < maxLinhas) {
-        linhas.push('');
+    while (linhasFinal.length < maxLinhas) {
+        linhasFinal.push("");
     }
-    // Mantém espaços em branco no início e fim de cada linha
-    return linhas.map(l => l.replace(/ /g, '\u00A0'));
+    return linhasFinal;
 }
 
 router.post("/gerar-pdf", async (req, res) => {
@@ -93,14 +110,12 @@ router.post("/gerar-pdf", async (req, res) => {
             });
         }
 
-        // Gera as linhas do PDF exatamente como no textarea
-        let linhasTexto = linhasTextareaParaPDF(texto, totalLinhas);
+        // Gera as linhas do PDF quebrando conforme largura
+        let linhasTexto = linhasTextareaParaPDF(texto, totalLinhas, fonte, tamanhoFonte, maxWidth);
 
-        // Desenha o texto, linha a linha, igual ao textarea
+        // Desenha o texto, linha a linha, igual ao textarea (com quebra)
         for (let i = 0; i < linhasTexto.length && i < totalLinhas; i++) {
-            // Ajuste: alinhar o texto exatamente sobre a linha
-            const y = pageHeight - marginTop - i * lineSpacing + 2; // +2 para alinhar melhor
-            // Mantém espaços em branco e linhas vazias
+            const y = pageHeight - marginTop - i * lineSpacing + 2;
             const linha = linhasTexto[i].length === 0 ? "\u00A0" : linhasTexto[i];
             page.drawText(linha, {
                 x: marginX + 3,
