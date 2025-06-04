@@ -97,17 +97,15 @@ router.post("/gerar-pdf", async (req, res) => {
 
         // Desenha o texto, linha a linha, igual ao textarea
         for (let i = 0; i < linhasTexto.length && i < totalLinhas; i++) {
-            // Centraliza verticalmente o texto entre as linhas
-            // O baseline do texto é na base da fonte, então suba metade da diferença entre lineSpacing e tamanhoFonte
-            const y = pageHeight - marginTop - i * lineSpacing - (lineSpacing - tamanhoFonte) / 2;
-            page.drawText(linhasTexto[i], {
+            const y = pageHeight - marginTop - i * lineSpacing + 5;
+            // Respeita espaços em branco no início/fim e linhas em branco
+            const linha = linhasTexto[i].replace(/\s+$/g, "\u00A0"); // Mantém espaços finais visíveis
+            page.drawText(linha.length === 0 ? "\u00A0" : linha, {
                 x: marginX + 3,
                 y,
                 size: tamanhoFonte,
                 font: fonte,
                 color: preto,
-                maxWidth: maxWidth - 6, // Garante que não ultrapasse a linha
-                // No pdf-lib, drawText não faz wrap automático, mas como cada linha já é do textarea, não precisa wrap
             });
         }
 
