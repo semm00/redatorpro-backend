@@ -23,8 +23,8 @@ router.get('/', async (req, res) => {
     console.log("usersWithEssays:", usersWithEssays.length);
 
     const now = new Date();
-    const fourWeeksAgo = new Date(now);
-    fourWeeksAgo.setDate(now.getDate() - 28);
+    const oneWeekAgo = new Date(now);
+    oneWeekAgo.setDate(now.getDate() - 7);
 
     const fifteenDaysAgo = new Date(now);
     fifteenDaysAgo.setDate(now.getDate() - 15);
@@ -50,15 +50,21 @@ router.get('/', async (req, res) => {
       total
     }));
 
-    const usuarios = usersWithEssays.map(u => ({
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      tipo: u.tipo,
-      dataCadastro: u.createdAt,
-      totalRedacoes: u.essays.length,
-      redacoesSemanais: u.essays.filter(e => new Date(e.createdAt) > fourWeeksAgo).length
-    }));
+    const usuarios = usersWithEssays.map(u => {
+      // Ordena as redações por data decrescente
+      const sortedEssays = [...u.essays].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const ultimaRedacao = sortedEssays.length > 0 ? sortedEssays[0].createdAt : null;
+      return {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        tipo: u.tipo,
+        dataCadastro: u.createdAt,
+        totalRedacoes: u.essays.length,
+        redacoesUltimaSemana: u.essays.filter(e => new Date(e.createdAt) > oneWeekAgo).length,
+        dataUltimaRedacao: ultimaRedacao
+      };
+    });
 
     res.json({
       usuarios,
