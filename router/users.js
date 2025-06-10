@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import multer from 'multer';
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer'; // Volta para o Nodemailer
 
 const userRouter = Router();
 const prisma = new PrismaClient();
@@ -15,11 +15,11 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
-// Configuração do Nodemailer para Brevo
+// Configuração do Nodemailer para MailerSend/Brevo/Gmail/etc
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST, // smtp-relay.brevo.com
+  host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT) || 587,
-  secure: false, // STARTTLS
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -88,7 +88,7 @@ userRouter.post('/', upload.single('certificado'), async (req, res) => {
         escolaridade: tipo === 'corretor' ? escolaridade : null,
         certificado: tipo === 'corretor' ? certificadoUrl : null,
         aprovado: tipo === 'corretor' ? false : null,
-        emailVerificado: false // novo campo
+        emailVerificado: false
       }
     });
 
