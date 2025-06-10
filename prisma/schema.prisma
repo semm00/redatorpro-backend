@@ -19,6 +19,7 @@ model users {
   aprovado     Boolean? @default(false) // só para corretor
   emailVerificado Boolean @default(false) // <-- novo campo
   essays       Essay[]
+  createdAt    DateTime @default(now()) 
 }
 
 model Essay {
