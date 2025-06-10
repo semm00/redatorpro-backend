@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import multer from 'multer';
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer'; // Usar Nodemailer com Gmail
 
 const userRouter = Router();
 const prisma = new PrismaClient();
@@ -15,11 +15,19 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
+// Configuração do Nodemailer para Gmail
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS
+  }
+});
+
 async function enviarEmailVerificacao(email, token) {
-  const resend = new Resend(process.env.RESEND_API_KEY); // Inicialize aqui!
   const url = `${process.env.FRONTEND_URL || 'https://ifpi-picos.github.io/projeto-integrador-redatorpro'}/verificar-email.html?token=${token}`;
-  await resend.emails.send({
-    from: process.env.RESEND_FROM,
+  await transporter.sendMail({
+    from: `"RedatorPRO" <${process.env.GMAIL_USER}>`,
     to: email,
     subject: "Verifique seu e-mail - RedatorPRO",
     html: `<p>Olá! Clique no link abaixo para verificar seu e-mail:</p>
