@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import multer from 'multer';
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
-import { Resend } from 'resend'; // Usar Resend
+import { Resend } from 'resend';
 
 const userRouter = Router();
 const prisma = new PrismaClient();
@@ -15,9 +15,8 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 async function enviarEmailVerificacao(email, token) {
+  const resend = new Resend(process.env.RESEND_API_KEY); // Inicialize aqui!
   const url = `${process.env.FRONTEND_URL || 'https://ifpi-picos.github.io/projeto-integrador-redatorpro'}/verificar-email.html?token=${token}`;
   await resend.emails.send({
     from: process.env.RESEND_FROM,
