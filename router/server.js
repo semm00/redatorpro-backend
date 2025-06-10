@@ -43,19 +43,19 @@ router.post("/", upload.single("file"), async (req, res) => {
         }
 
         // Verifica se o usuário está autenticado
-        if (!req.session.user) {
+        if (!req.user) {
             console.log("Usuário não autenticado.");
             return res.status(401).json({ error: "Usuário não autenticado." });
         }
 
-        console.log("Usuário autenticado:", req.session.user);
+        console.log("Usuário autenticado:", req.user);
 
         // Salvar a redação no banco de dados
         const essay = await prisma.essay.create({
             data: {
                 text: text || null,
                 urlImage: publicUrl || null,
-                authorId: req.session.user.id // Usa o ID do usuário logado na sessão
+                authorId: req.user.id // Usa o ID do usuário do JWT
             }
         });
 

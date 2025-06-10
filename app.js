@@ -1,7 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import session from 'express-session';
-import pgSession from 'connect-pg-simple';
 import logger from './middlewares/logger.js';
 import userRouter from './router/users.js';
 import loginRouter from './router/login.js';
@@ -11,32 +9,18 @@ import redchatRouter from './router/redchat.js';
 import geminiRouter from './router/gemini.js';
 import redacoesRouter from './router/redacoes.js';
 
-
 import dotenv from 'dotenv';
+import authMiddleware from './middlewares/auth.js'; // Novo middleware JWT
 
 dotenv.config();
 const app = express();
 app.set('trust proxy', 1);  // Confia no proxy (necessário no Render)
-
-const PgSession = pgSession(session);
 
 app.use(cors({
   origin: 'https://ifpi-picos.github.io', // URL do front-end
   credentials: true,
 }));
 app.use(express.json());
-
-// Configurar o middleware de sessão com cookie cross-site
-app.use(session({
-  store: new PgSession({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: true // Cria a tabela de sessões automaticamente se não existir
-  }),
-  secret: 'your-secret-key',  // substitua por uma chave segura
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: true, sameSite: 'none' } // Necessário para HTTPS e cross-site
-}));
 
 app.use(logger);
 
@@ -50,11 +34,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/admin', express.static('admin'));
 app.use('/users', userRouter);
 app.use('/login', loginRouter);
-app.use('/server', serverRouter);
+app.use('/server', authMiddleware, serverRouter);
 app.use("/pdf", pdfRoutes);
-app.use('/redchat', redchatRouter);
+app.use('/redchat', authMiddleware, redchatRouter);
 app.use('/gemini', geminiRouter);
-app.use('/redacoes', redacoesRouter);
+app.use('/redacoes', authMiddleware, redacoesRouter);
 
 
 const PORT = process.env.PORT || 3000;

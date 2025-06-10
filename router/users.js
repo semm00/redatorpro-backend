@@ -3,6 +3,7 @@ import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 import { createClient } from '@supabase/supabase-js';
+import jwt from 'jsonwebtoken';
 
 const userRouter = Router();
 const prisma = new PrismaClient();
@@ -13,7 +14,6 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
-// ...existing code...
 userRouter.post('/', upload.single('certificado'), async (req, res) => {
   console.log("Recebendo cadastro:", req.body, req.file);
 
@@ -68,16 +68,19 @@ userRouter.post('/', upload.single('certificado'), async (req, res) => {
       }
     });
 
-    console.log("Usuário salvo no banco:", userSaved);
+    // Gera token JWT para o novo usuário
+    const token = jwt.sign(
+      { id: userSaved.id, name: userSaved.name, email: userSaved.email, tipo: userSaved.tipo },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
-    req.session.user = { id: userSaved.id, name: userSaved.name, email: userSaved.email, tipo: userSaved.tipo };
-    res.status(201).json(userSaved);
+    res.status(201).json({ ...userSaved, token });
   } catch (error) {
     console.error("Erro ao salvar usuário:", error);
     res.status(500).json({ error: "Erro ao salvar usuário." });
   }
 });
-// ...existing code...
 
 userRouter.patch('/:id/aprovar', async (req, res) => {
   try {

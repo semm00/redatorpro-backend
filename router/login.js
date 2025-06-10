@@ -1,6 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt'; // Certifique-se de instalar com "npm install bcrypt"
 import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -31,10 +32,17 @@ router.post('/', async (req, res) => {  // Rota para login
     return res.status(403).json({ error: "Seu cadastro de corretor ainda não foi aprovado." });
     }
 
-    // Salva o ID do usuário na sessão
-    req.session.user = { id: user.id, name: user.name, email: user.email };
+    // Gera o token JWT
+    const token = jwt.sign(
+      { id: user.id, name: user.name, email: user.email, tipo: user.tipo },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
-    res.status(200).json({ user: { id: user.id, name: user.name, email: user.email } });
+    res.status(200).json({
+      user: { id: user.id, name: user.name, email: user.email, tipo: user.tipo },
+      token
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

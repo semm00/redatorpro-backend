@@ -21,7 +21,7 @@ router.post('/', upload.single('imagem'), async (req, res) => {
   const { tipoCorrecao, tema, texto } = req.body;
   const file = req.file;
 
-  if (!req.session.user) {
+  if (!req.user) {
     return res.status(401).json({ error: 'Usuário não autenticado.' });
   }
 
@@ -223,9 +223,9 @@ ${texto}
 
     const essay = await prisma.essay.create({
       data: {
-        text: texto && texto.trim() ? texto : null, // <-- Corrige aqui
+        text: texto && texto.trim() ? texto : null,
         urlImage: urlImage,
-        authorId: req.session.user.id,
+        authorId: req.user.id,
         corrigidaPor: "ia",
         correcaoIa: correcao,
         tipoCorrecao,
