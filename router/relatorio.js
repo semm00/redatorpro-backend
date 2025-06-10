@@ -19,6 +19,9 @@ router.get('/', async (req, res) => {
       }
     });
 
+    // LOG para depuração
+    console.log("usersWithEssays:", usersWithEssays.length);
+
     const now = new Date();
     const fourWeeksAgo = new Date(now);
     fourWeeksAgo.setDate(now.getDate() - 28);
@@ -33,6 +36,8 @@ router.get('/', async (req, res) => {
       },
       select: { createdAt: true }
     });
+
+    console.log("cadastros últimos 15 dias:", cadastros.length);
 
     // Agrupa por dia (YYYY-MM-DD)
     const cadastrosPorDiaObj = {};
@@ -60,7 +65,12 @@ router.get('/', async (req, res) => {
       cadastrosPorDia
     });
   } catch (err) {
-    res.status(500).json({ error: "Erro ao gerar relatório." });
+    console.error("Erro ao gerar relatório:", err);
+    res.status(500).json({
+      error: "Erro ao gerar relatório.",
+      usuarios: [],
+      cadastrosPorDia: []
+    });
   }
 });
 
