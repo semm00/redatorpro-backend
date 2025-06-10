@@ -32,6 +32,10 @@ router.post('/', async (req, res) => {  // Rota para login
     return res.status(403).json({ error: "Seu cadastro de corretor ainda não foi aprovado." });
     }
 
+    if (!user.emailVerificado) {
+      return res.status(403).json({ error: "Você precisa verificar seu e-mail antes de fazer login." });
+    }
+
     // Gera o token JWT
     const token = jwt.sign(
       { id: user.id, name: user.name, email: user.email, tipo: user.tipo },
