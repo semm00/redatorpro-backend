@@ -17,7 +17,9 @@ const supabase = createClient(
 
 // Configuração do Nodemailer (ajuste para seu provedor)
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // ou outro serviço
+  host: process.env.EMAIL_HOST, // smtp-relay.brevo.com
+  port: Number(process.env.EMAIL_PORT) || 587, // 587
+  secure: false, // Brevo usa STARTTLS (não SSL direto)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -107,6 +109,9 @@ userRouter.post('/', upload.single('certificado'), async (req, res) => {
 
     res.status(201).json({ ...userSaved, token, mensagem: "Cadastro realizado. Verifique seu e-mail para ativar a conta." });
   } catch (error) {
+    if (error.code === 'P2002' && error.meta && error.meta.target && error.meta.target.includes('email')) {
+      return res.status(409).json({ error: "Este e-mail já está cadastrado. Faça login ou recupere sua senha." });
+    }
     console.error("Erro ao salvar usuário:", error);
     res.status(500).json({ error: "Erro ao salvar usuário." });
   }
