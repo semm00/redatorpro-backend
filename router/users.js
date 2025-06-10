@@ -129,13 +129,24 @@ userRouter.get('/verificar-email', async (req, res) => {
   if (!token) return res.status(400).json({ error: "Token não fornecido." });
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    await prisma.users.update({
-      where: { id: decoded.id },
-      data: { emailVerificado: true }
+    // Busca o usuário antes de atualizar
+    const user = await prisma.users.findUnique({
+      where: { id: decoded.id }
     });
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+    // Só atualiza se ainda não estiver verificado
+    if (!user.emailVerificado) {
+      await prisma.users.update({
+        where: { id: decoded.id },
+        data: { emailVerificado: true }
+      });
+    }
     // Redireciona para página de sucesso (ajuste a URL se quiser)
     return res.redirect(`${process.env.FRONTEND_URL || 'https://ifpi-picos.github.io/projeto-integrador-redatorpro'}/verificacao-sucesso.html`);
   } catch (err) {
+    console.error("Erro ao verificar e-mail:", err);
     return res.status(400).json({ error: "Token inválido ou expirado." });
   }
 });
