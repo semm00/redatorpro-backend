@@ -126,14 +126,24 @@ userRouter.post('/', upload.single('certificado'), async (req, res) => {
 // Rota para verificar e-mail
 userRouter.get('/verificar-email', async (req, res) => {
   const { token } = req.query;
-  if (!token) return res.status(400).json({ error: "Token não fornecido." });
+  console.log("[VERIFICAR-EMAIL] Token recebido:", token);
+
+  if (!token) {
+    console.log("[VERIFICAR-EMAIL] Nenhum token fornecido.");
+    return res.status(400).json({ error: "Token não fornecido." });
+  }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("[VERIFICAR-EMAIL] Token decodificado:", decoded);
+
     // Busca o usuário antes de atualizar
     const user = await prisma.users.findUnique({
       where: { id: decoded.id }
     });
+    console.log("[VERIFICAR-EMAIL] Usuário encontrado:", user);
+
     if (!user) {
+      console.log("[VERIFICAR-EMAIL] Usuário não encontrado para o ID:", decoded.id);
       return res.status(404).json({ error: "Usuário não encontrado." });
     }
     // Só atualiza se ainda não estiver verificado
@@ -142,11 +152,16 @@ userRouter.get('/verificar-email', async (req, res) => {
         where: { id: decoded.id },
         data: { emailVerificado: true }
       });
+      console.log("[VERIFICAR-EMAIL] E-mail marcado como verificado para o usuário:", decoded.id);
+    } else {
+      console.log("[VERIFICAR-EMAIL] E-mail já estava verificado para o usuário:", decoded.id);
     }
     // Redireciona para página de sucesso (ajuste a URL se quiser)
-    return res.redirect(`${process.env.FRONTEND_URL || 'https://ifpi-picos.github.io/projeto-integrador-redatorpro'}/verificacao-sucesso.html`);
+    const redirectUrl = `${process.env.FRONTEND_URL || 'https://ifpi-picos.github.io/projeto-integrador-redatorpro'}/verificacao-sucesso.html`;
+    console.log("[VERIFICAR-EMAIL] Redirecionando para:", redirectUrl);
+    return res.redirect(redirectUrl);
   } catch (err) {
-    console.error("Erro ao verificar e-mail:", err);
+    console.error("[VERIFICAR-EMAIL] Erro ao verificar e-mail:", err);
     return res.status(400).json({ error: "Token inválido ou expirado." });
   }
 });
