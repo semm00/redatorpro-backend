@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 
 router.get('/', async (req, res) => {
   try {
-    // ...mesmo código da rota /relatorio anterior...
     const usersWithEssays = await prisma.users.findMany({
       select: {
         id: true,
@@ -27,13 +26,24 @@ router.get('/', async (req, res) => {
     const fifteenDaysAgo = new Date(now);
     fifteenDaysAgo.setDate(now.getDate() - 15);
 
-    const cadastrosPorDia = await prisma.users.groupBy({
-      by: ['createdAt'],
-      _count: { id: true },
+    // Busca todos os usuários criados nos últimos 15 dias
+    const cadastros = await prisma.users.findMany({
       where: {
         createdAt: { gte: fifteenDaysAgo }
-      }
+      },
+      select: { createdAt: true }
     });
+
+    // Agrupa por dia (YYYY-MM-DD)
+    const cadastrosPorDiaObj = {};
+    cadastros.forEach(u => {
+      const dia = u.createdAt.toISOString().slice(0, 10);
+      cadastrosPorDiaObj[dia] = (cadastrosPorDiaObj[dia] || 0) + 1;
+    });
+    const cadastrosPorDia = Object.entries(cadastrosPorDiaObj).map(([data, total]) => ({
+      data,
+      total
+    }));
 
     const usuarios = usersWithEssays.map(u => ({
       id: u.id,
@@ -47,10 +57,7 @@ router.get('/', async (req, res) => {
 
     res.json({
       usuarios,
-      cadastrosPorDia: cadastrosPorDia.map(c => ({
-        data: c.createdAt,
-        total: c._count.id
-      }))
+      cadastrosPorDia
     });
   } catch (err) {
     res.status(500).json({ error: "Erro ao gerar relatório." });
