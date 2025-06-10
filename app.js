@@ -17,10 +17,24 @@ dotenv.config();
 const app = express();
 app.set('trust proxy', 1);  // Confia no proxy (necessário no Render)
 
+// CORS para todas as rotas e métodos
 app.use(cors({
-  origin: 'https://ifpi-picos.github.io', // URL do front-end
+  origin: 'https://ifpi-picos.github.io',
   credentials: true,
 }));
+
+// Middleware extra para garantir CORS em todas as respostas
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://ifpi-picos.github.io");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(express.json());
 
 app.use(logger);
