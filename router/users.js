@@ -98,7 +98,15 @@ userRouter.post('/', upload.single('certificado'), async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
-    await enviarEmailVerificacao(userSaved.email, emailToken);
+    try {
+      await enviarEmailVerificacao(userSaved.email, emailToken);
+      console.log("E-mail de verificação enviado para:", userSaved.email);
+    } catch (emailErr) {
+      console.error("Erro ao enviar e-mail de verificação:", emailErr);
+      // Opcional: remover o usuário criado se o e-mail falhar
+      // await prisma.users.delete({ where: { id: userSaved.id } });
+      return res.status(500).json({ error: "Erro ao enviar e-mail de verificação. Tente novamente mais tarde." });
+    }
 
     // Gera token JWT para o novo usuário (mas login só será permitido após verificação)
     const token = jwt.sign(
