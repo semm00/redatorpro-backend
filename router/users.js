@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import multer from 'multer';
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer'; // Volta para o Nodemailer
+import { Resend } from 'resend'; // Usar Resend
 
 const userRouter = Router();
 const prisma = new PrismaClient();
@@ -15,21 +15,12 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
-// Configuração do Nodemailer para MailerSend/Brevo/Gmail/etc
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function enviarEmailVerificacao(email, token) {
   const url = `${process.env.FRONTEND_URL || 'https://ifpi-picos.github.io/projeto-integrador-redatorpro'}/verificar-email.html?token=${token}`;
-  await transporter.sendMail({
-    from: `"RedatorPRO" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: process.env.RESEND_FROM,
     to: email,
     subject: "Verifique seu e-mail - RedatorPRO",
     html: `<p>Olá! Clique no link abaixo para verificar seu e-mail:</p>
