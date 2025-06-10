@@ -26,12 +26,37 @@ const transporter = nodemailer.createTransport({
 
 async function enviarEmailVerificacao(email, token) {
   const url = `${process.env.FRONTEND_URL || 'https://ifpi-picos.github.io/projeto-integrador-redatorpro'}/verificar-email.html?token=${token}`;
+  const logoUrl = "https://ifpi-picos.github.io/projeto-integrador-redatorpro/imagens/logo%20nome.png"; // ajuste se necessário
+
   await transporter.sendMail({
     from: `"RedatorPRO" <${process.env.GMAIL_USER}>`,
     to: email,
     subject: "Verifique seu e-mail - RedatorPRO",
-    html: `<p>Olá! Clique no link abaixo para verificar seu e-mail:</p>
-           <a href="${url}">${url}</a>`
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:24px;background:#f9f9f9;border-radius:8px;">
+        <div style="text-align:center;">
+          <img src="${logoUrl}" alt="RedatorPRO" style="max-width:220px;margin-bottom:24px;">
+        </div>
+        <h2 style="color:#1a237e;text-align:center;">Bem-vindo ao RedatorPRO!</h2>
+        <p style="font-size:1.1em;color:#333;text-align:center;">
+          Olá! Para ativar sua conta, clique no botão abaixo para verificar seu e-mail:
+        </p>
+        <div style="text-align:center;margin:32px 0;">
+          <a href="${url}" style="background:#1a237e;color:#fff;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:1.1em;display:inline-block;">
+            Verificar E-mail
+          </a>
+        </div>
+        <p style="color:#555;text-align:center;">
+          Se não conseguir clicar, copie e cole este link no navegador:<br>
+          <a href="${url}" style="color:#1a237e;">${url}</a>
+        </p>
+        <hr style="margin:32px 0;">
+        <p style="font-size:0.95em;color:#888;text-align:center;">
+          Se você não criou uma conta, ignore este e-mail.<br>
+          © RedatorPRO
+        </p>
+      </div>
+    `
   });
 }
 
@@ -197,6 +222,27 @@ userRouter.patch('/:id/reprovar', async (req, res) => {
     res.json({ message: "Corretor removido com sucesso!" });
   } catch (error) {
     res.status(500).json({ error: "Erro ao remover corretor." });
+  }
+});
+
+userRouter.post('/reenviar-verificacao', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "E-mail não fornecido." });
+  try {
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado." });
+    if (user.emailVerificado) return res.status(400).json({ error: "E-mail já verificado." });
+
+    const emailToken = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+    await enviarEmailVerificacao(user.email, emailToken);
+    res.json({ message: "E-mail de verificação reenviado." });
+  } catch (err) {
+    console.error("Erro ao reenviar verificação:", err);
+    res.status(500).json({ error: "Erro ao reenviar verificação." });
   }
 });
 
