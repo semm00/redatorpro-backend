@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
     const user = await prisma.users.findUnique({
       where: { id: req.user.id },
       select: {
-        id: true, name: true, email: true, tipo: true, instagram: true, fotoPerfil: true, descricao: true
+        id: true, name: true, email: true, tipo: true, instagram: true, fotoPerfil: true, descricao: true, interesses: true
       }
     });
     console.log('[GET /perfil] user:', user);
@@ -41,7 +41,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Atualizar perfil (nome, instagram, foto, descricao)
+// Atualizar perfil (nome, instagram, foto, descricao, interesses)
 router.put('/', upload.single('fotoPerfil'), async (req, res) => {
   console.log('[PUT /perfil] req.user:', req.user);
   if (!req.user) {
@@ -49,6 +49,24 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
     return res.status(401).json({ error: 'Não autenticado' });
   }
   const { name, instagram, descricao } = req.body;
+  let interesses = [];
+  try {
+    if (req.body.interesses) {
+      interesses = JSON.parse(req.body.interesses);
+      if (!Array.isArray(interesses)) interesses = [];
+    }
+  } catch {
+    interesses = [];
+  }
+  // Validação backend
+  let erros = [];
+  if (!name || !name.trim()) erros.push('O nome não pode ser vazio.');
+  if (instagram && !/^[a-zA-Z0-9._]+$/.test(instagram)) erros.push('O Instagram só pode conter letras, números, ponto ou underline.');
+  if (descricao && descricao.length > 200) erros.push('A descrição deve ter no máximo 200 caracteres.');
+  if (interesses.length > 8) erros.push('Máximo de 8 áreas de interesse.');
+  if (interesses.some(tag => typeof tag !== 'string' || tag.length > 20)) erros.push('Cada área de interesse deve ter até 20 caracteres.');
+  if (erros.length) return res.status(400).json({ error: erros.join(' ') });
+
   let fotoPerfilUrl = null;
 
   if (req.file) {
@@ -76,9 +94,10 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
         name,
         instagram,
         descricao,
+        interesses,
         ...(fotoPerfilUrl && { fotoPerfil: fotoPerfilUrl })
       },
-      select: { id: true, name: true, instagram: true, fotoPerfil: true, descricao: true }
+      select: { id: true, name: true, instagram: true, fotoPerfil: true, descricao: true, interesses: true, email: true }
     });
     console.log('[PUT /perfil] Perfil atualizado:', updated);
     res.json(updated);

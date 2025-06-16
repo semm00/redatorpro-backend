@@ -21,6 +21,7 @@ model users {
   instagram      String?    // novo campo
   fotoPerfil     String?    // novo campo
   descricao      String?    // novo campo
+  interesses     String[]   // novo campo: lista de áreas de interesse
   essays       Essay[]
   createdAt    DateTime @default(now()) 
 }
