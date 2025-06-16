@@ -109,7 +109,10 @@ userRouter.post('/', upload.single('certificado'), async (req, res) => {
         escolaridade: tipo === 'corretor' ? escolaridade : null,
         certificado: tipo === 'corretor' ? certificadoUrl : null,
         aprovado: tipo === 'corretor' ? false : null,
-        emailVerificado: false
+        emailVerificado: false,
+        instagram: null,
+        fotoPerfil: null,
+        descricao: null
       }
     });
 

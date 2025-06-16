@@ -9,6 +9,7 @@ import redchatRouter from './router/redchat.js';
 import geminiRouter from './router/gemini.js';
 import redacoesRouter from './router/redacoes.js';
 import relatorioRouter from './router/relatorio.js';
+import perfilRouter from './router/perfil.js';
 
 import dotenv from 'dotenv';
 import authMiddleware from './middlewares/auth.js'; // Novo middleware JWT
@@ -55,6 +56,7 @@ app.use('/redchat', authMiddleware, redchatRouter);
 app.use('/gemini', geminiRouter);
 app.use('/redacoes', authMiddleware, redacoesRouter);
 app.use('/relatorio', relatorioRouter);
+app.use('/perfil', authMiddleware, perfilRouter);
 
 
 const PORT = process.env.PORT || 3000;
