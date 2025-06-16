@@ -13,6 +13,7 @@ const supabase = createClient(
 
 // Buscar perfil do usuário autenticado
 router.get('/', async (req, res) => {
+  console.log('[GET /perfil] Authorization header:', req.headers.authorization);
   console.log('[GET /perfil] req.user:', req.user);
   if (!req.user) {
     console.log('[GET /perfil] Usuário não autenticado');
