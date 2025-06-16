@@ -30,10 +30,10 @@ router.get('/', async (req, res) => {
     const redacoes = await prisma.essay.findMany({
       where: { authorId: req.user.id },
       orderBy: { createdAt: 'desc' },
-      select: { nota: true }
+      select: { notaTotal: true } // Corrigido: era nota, agora notaTotal
     });
     const totalRedacoes = redacoes.length;
-    const ultimaNota = totalRedacoes > 0 ? redacoes[0].nota : null;
+    const ultimaNota = totalRedacoes > 0 ? redacoes[0].notaTotal : null;
     res.json({ ...user, totalRedacoes, ultimaNota });
   } catch (err) {
     console.error('[GET /perfil] Erro ao buscar perfil:', err);
