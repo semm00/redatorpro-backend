@@ -54,6 +54,11 @@ Caso tenha dúvida se o erro foi do autor ou do OCR, apenas comente isso com cau
 
 “A palavra ‘bras’ pode ter sido mal interpretada pelo OCR. Se manuscrita corretamente, não é erro ortográfico.”
 
+Tentar relevar erros de OCR é importante para não penalizar injustamente o aluno.
+
+IMPORTANTE:
+tentar ser compassivo o máximo possível em erros da competência I, e não penalizar erros que possam ser de OCR.
+
 📊 ESTRUTURA DA CORREÇÃO:
 Para cada competência (C1 a C5), apresente:
 
@@ -67,7 +72,6 @@ Exemplo de estrutura para cada competência:
 🧠 Competência I — Domínio da Norma Culta
 Nota: 160/200
 📝 Comentário: O texto apresenta poucos erros gramaticais e ortográficos. Há desvio de acentuação em “é” e uso indevido de vírgula em construções coordenadas.
-dar exemplos de erros comuns no texto, de forma breve.
 ✅ Recomendação: Praticar pontuação em orações coordenadas e revisar regras de acentuação.
 
 📚 Competência II — Compreensão da Proposta
