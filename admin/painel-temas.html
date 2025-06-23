@@ -37,7 +37,7 @@
     <label>Textos Motivadores (texto):</label>
     <div id="textos-motivadores-container">
       <div class="texto-motivador-bloco">
-        <input type="text" name="textosMotivadores" placeholder="Texto motivador">
+        <textarea name="textosMotivadores" placeholder="Texto motivador"></textarea>
         <input type="text" name="fontesMotivadores" placeholder="Fonte do texto (opcional)">
       </div>
     </div>
@@ -61,7 +61,7 @@
       const bloco = document.createElement('div');
       bloco.className = 'texto-motivador-bloco';
       bloco.innerHTML = `
-        <input type="text" name="textosMotivadores" placeholder="Texto motivador">
+        <textarea name="textosMotivadores" placeholder="Texto motivador"></textarea>
         <input type="text" name="fontesMotivadores" placeholder="Fonte do texto (opcional)">
       `;
       container.appendChild(bloco);
@@ -95,11 +95,10 @@
       }
 
       // Adiciona textos motivadores (texto) e fontes
-      const textos = form.querySelectorAll('input[name="textosMotivadores"]');
+      const textos = form.querySelectorAll('textarea[name="textosMotivadores"]');
       const fontesTextos = form.querySelectorAll('input[name="fontesMotivadores"]');
       textos.forEach((input, idx) => {
         if (input.value.trim()) formData.append('textosMotivadores', input.value);
-        // Mesmo que não tenha texto, envie fonte para manter o alinhamento dos índices
         if (fontesTextos[idx]) formData.append('fontesMotivadores', fontesTextos[idx].value);
       });
 
@@ -119,7 +118,7 @@
         alert('Tema adicionado com sucesso!');
         form.reset();
         document.getElementById('textos-motivadores-container').innerHTML = `<div class="texto-motivador-bloco">
-          <input type="text" name="textosMotivadores" placeholder="Texto motivador">
+          <textarea name="textosMotivadores" placeholder="Texto motivador"></textarea>
           <input type="text" name="fontesMotivadores" placeholder="Fonte do texto (opcional)">
         </div>`;
         document.getElementById('imagens-motivadoras-container').innerHTML = `<div class="imagem-motivadora-bloco">
