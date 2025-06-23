@@ -14,7 +14,7 @@
 </head>
 <body>
   <h1>Adicionar Novo Tema</h1>
-  <form id="form-tema">
+  <form id="form-tema" enctype="multipart/form-data">
     <label for="tipo">Tipo de Tema:</label>
     <select id="tipo" name="tipo">
       <option value="ENEM">ENEM</option>
@@ -31,6 +31,9 @@
     <label for="proposta">Proposta de Redação:</label>
     <textarea id="proposta" name="proposta" required></textarea>
 
+    <label for="capa">Imagem de Capa do Tema:</label>
+    <input type="file" id="capa" name="capa" accept="image/*" required>
+
     <label>Textos Motivadores (texto):</label>
     <div id="textos-motivadores-container">
       <input type="text" name="textosMotivadores" placeholder="Texto motivador">
@@ -38,7 +41,10 @@
     <button type="button" onclick="adicionarCampoTexto()">Adicionar outro texto</button>
 
     <label for="imagensMotivadoras">Textos Motivadores (imagens):</label>
-    <input type="file" id="imagensMotivadoras" name="imagensMotivadoras" multiple>
+    <div id="imagens-motivadoras-container">
+      <input type="file" name="imagensMotivadoras" accept="image/*">
+    </div>
+    <button type="button" onclick="adicionarCampoImagem()">Adicionar outra imagem</button>
 
     <button type="submit">Adicionar Tema</button>
   </form>
@@ -53,10 +59,45 @@
       container.appendChild(input);
     }
 
+    function adicionarCampoImagem() {
+      const container = document.getElementById('imagens-motivadoras-container');
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.name = 'imagensMotivadoras';
+      input.accept = 'image/*';
+      container.appendChild(input);
+    }
+
     document.getElementById('form-tema').addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
-      const formData = new FormData(form);
+      const formData = new FormData();
+
+      // Adiciona campos simples
+      formData.append('tipo', form.tipo.value);
+      formData.append('titulo', form.titulo.value);
+      formData.append('instrucoes', form.instrucoes.value);
+      formData.append('proposta', form.proposta.value);
+
+      // Adiciona imagem de capa
+      if (form.capa.files.length > 0) {
+        formData.append('capa', form.capa.files[0]);
+      }
+
+      // Adiciona textos motivadores (texto)
+      const textos = form.querySelectorAll('input[name="textosMotivadores"]');
+      textos.forEach(input => {
+        if (input.value.trim()) formData.append('textosMotivadores', input.value);
+      });
+
+      // Adiciona textos motivadores (imagens)
+      const imagensInputs = form.querySelectorAll('input[name="imagensMotivadoras"]');
+      imagensInputs.forEach(input => {
+        if (input.files.length > 0) {
+          formData.append('imagensMotivadoras', input.files[0]);
+        }
+      });
+
       const response = await fetch('/temas', {
         method: 'POST',
         body: formData,
@@ -65,8 +106,8 @@
         alert('Tema adicionado com sucesso!');
         form.reset();
         // Remove campos extras de texto motivador
-        const container = document.getElementById('textos-motivadores-container');
-        container.innerHTML = '<input type="text" name="textosMotivadores" placeholder="Texto motivador">';
+        document.getElementById('textos-motivadores-container').innerHTML = '<input type="text" name="textosMotivadores" placeholder="Texto motivador">';
+        document.getElementById('imagens-motivadoras-container').innerHTML = '<input type="file" name="imagensMotivadoras" accept="image/*">';
       } else {
         alert('Erro ao adicionar tema.');
       }

@@ -24,12 +24,27 @@ router.get('/', async (req, res) => {
 // Rota para adicionar um novo tema
 router.post(
   '/',
-  upload.fields([{ name: 'imagensMotivadoras', maxCount: 10 }]),
+  upload.fields([
+    { name: 'capa', maxCount: 1 },
+    { name: 'imagensMotivadoras', maxCount: 20 },
+  ]),
   async (req, res) => {
     const { tipo, titulo, instrucoes, proposta, textosMotivadores } = req.body;
+    const capaFile = req.files['capa'] ? req.files['capa'][0] : null;
     const imagensMotivadoras = req.files['imagensMotivadoras'] || [];
 
     try {
+      // Upload da imagem de capa para o Supabase
+      let urlCapa = '';
+      if (capaFile) {
+        const fileName = `capa_${Date.now()}_${capaFile.originalname}`;
+        const { error } = await supabase.storage
+          .from('temas')
+          .upload(fileName, capaFile.buffer, { contentType: capaFile.mimetype });
+        if (error) throw error;
+        urlCapa = `${process.env.SUPABASE_URL}/storage/v1/object/public/temas/${fileName}`;
+      }
+
       // Upload das imagens motivadoras para o Supabase
       const imagensUrls = [];
       for (const arquivo of imagensMotivadoras) {
@@ -49,13 +64,12 @@ router.post(
           titulo,
           instrucoes,
           proposta,
-          imagem: imagensUrls[0] || '', // Usa a primeira imagem como capa
+          imagem: urlCapa, // Usa a imagem de capa enviada
         },
       });
 
       // Adiciona textos motivadores (texto)
       if (textosMotivadores) {
-        // textosMotivadores pode ser string ou array
         const textos = Array.isArray(textosMotivadores)
           ? textosMotivadores
           : [textosMotivadores];
