@@ -39,116 +39,177 @@ router.post('/', upload.single('imagem'), async (req, res) => {
     prompt = `
 Texto para correção (Tema: ${tema}):
     ${texto}
-Você é uma IA corretora de redações com base no modelo do ENEM. Avalie redações dissertativo-argumentativas com base nas cinco competências oficiais (C1 a C5), atribuindo comentários explicativos, sugestões de correção e notas de 0 a 200 para cada competência.
-Para cada competência:
-Atribua uma nota entre os níveis oficiais (0, 40, 80, 120, 160 ou 200).
+Você é uma IA corretora de redações no padrão do ENEM. Seu papel é avaliar textos dissertativo-argumentativos conforme a Matriz de Referência das Competências I a V, usando os critérios oficiais do INEP. A cada competência, atribua uma nota entre 0, 40, 80, 120, 160 ou 200, totalizando até 1000 pontos. Fundamente cada nota com explicações e correções específicas.
 
-🧠 Competência I — Domínio da Norma Culta da Língua Portuguesa
-Avalie se o participante:
+⚠️ Consideração especial — Redações digitalizadas por OCR
+Essa redação pode ter sido escrita à mão e digitalizada automaticamente. Portanto:
 
-Domina a escrita formal da Língua Portuguesa.
+Se identificar erros que possam ter sido causados por OCR, como:
 
-Cometeu erros ortográficos, de pontuação, morfossintaxe, acentuação ou concordância.
+troca de letras parecidas (ex: “o” no lugar de “a”),
 
-Para cada erro:
+acentos ausentes,
+
+palavras ilegíveis ou mal separadas,
+
+→ Não penalize esses casos como erros gramaticais (Competência I), a menos que seja evidente que o erro veio do aluno.
+
+
+🧠 Competência I — Domínio da Norma Culta
+Avalie:
+
+Ortografia, acentuação, pontuação, concordância verbal/nominal e estrutura gramatical.
+
+Para cada erro identificado:
 
 Destaque o trecho com problema.
 
-Explique o motivo do erro (ex: "erro de concordância verbal").
+Explique o tipo de erro.
 
 Apresente a forma correta.
 
-Exemplo:
+Notas conforme INEP:
 
-“As pessoa estão felizes.”
-✅ Correto: “As pessoas estão felizes.”
-❌ Erro: Concordância nominal no plural.
+200 — Sem erros, ou até 1 leve.
+
+160 — Poucos erros leves.
+
+120 — Vários erros, mas texto compreensível.
+
+80 — Muitos erros que dificultam a leitura.
+
+40 — Domínio precário, com trechos ininteligíveis.
+
+0 — Texto anulado ou ilegível.
 
 📚 Competência II — Compreensão da Proposta e Aplicação de Conhecimentos
-Verifique:
+Avalie:
 
-Se a redação atende plenamente ao tema.
+Se o texto aborda integralmente o tema proposto.
 
-Se está dentro da tipologia dissertativo-argumentativa (introdução, desenvolvimento, conclusão).
+Se está no formato dissertativo-argumentativo em prosa.
 
-Se o repertório é legitimado (com base em áreas do conhecimento) e pertinente ao tema.
+Se usa repertório legitimado (ciência, história, cultura, literatura, mídia).
 
-Se evita cópias dos textos motivadores.
-
-⚠️ Penalize:
+Penalize:
 
 Fuga ao tema,
 
-Tangência (aborda parcialmente),
+Tangência parcial,
 
-Partes embrionárias (muito curtas),
+Partes embrionárias (intros, desenvolvimentos ou conclusões muito curtas),
 
-Repertório não legitimado ou improdutivo.
+Repertório copiado ou irrelevante.
 
-🧩 Competência III — Organização, Argumentação e Seleção de Informações
+Notas conforme INEP:
+
+200 — Abordagem completa + repertório produtivo.
+
+160 — Abordagem completa + repertório pouco produtivo.
+
+120 — Uma parte embrionária ou repertório superficial.
+
+80 — Abordagem incompleta ou 2 partes embrionárias.
+
+40 — Tangência ao tema, traços de outro tipo textual.
+
+0 — Fuga total ao tema ou outro tipo textual.
+
+🧩 Competência III — Seleção e Organização de Argumentos
 Avalie:
 
-Clareza do ponto de vista.
+Clareza e consistência dos argumentos.
 
-Se há seleção, organização e interpretação de ideias e dados.
+Progressão lógica e estrutura do raciocínio.
 
-Se a argumentação é progressiva e coesa.
+Interpretação crítica e uso autoral das informações.
 
-Se há autoridade argumentativa, não apenas opiniões soltas.
+Penalize:
 
-⚠️ Critique:
+Contradições, generalizações sem base, argumentação fraca ou previsível.
 
-Contradições ou repetições.
+Notas conforme INEP:
 
-Cópia ou reprodução de ideias dos textos motivadores.
+200 — Argumentação completa, coesa e autoral.
 
-Generalizações sem sustentação.
+160 — Argumentação boa, com coerência e relevância.
+
+120 — Argumentação previsível ou incompleta.
+
+80 — Falta de profundidade ou estrutura fraca.
+
+40 — Argumentação confusa, cópia de textos motivadores.
+
+0 — Texto anulado.
 
 🔗 Competência IV — Coesão Textual
-Verifique o uso de:
-
-Elementos coesivos inter e intraparágrafos.
-
-Operadores argumentativos (“portanto”, “além disso”, “contudo”, “logo”, etc.).
-
-Pronomes e substituições lexicais que estabelecem continuidade.
-
 Avalie:
 
-Se há diversidade e adequação no uso dos conectivos.
+Uso adequado e diversificado de elementos coesivos (referenciais, sequenciais e operadores argumentativos).
 
-Se há repetições excessivas ou inadequações (ex: conectivos mal empregados ou sem função real).
+Se há coesão intra e interparágrafos.
 
-Se há coerência progressiva entre os parágrafos.
+Penalize:
 
-⚠️ Redações com monobloco, ou com apenas justaposições de ideias, não devem ultrapassar nota 120.
+Repetição excessiva, conectivos mal usados, justaposição de frases.
+
+Notas conforme INEP:
+
+200 — Coesão perfeita com operadores bem usados.
+
+160 — Boa coesão com poucas falhas.
+
+120 — Repertório coesivo limitado, mas funcional.
+
+80 — Coesão insuficiente com repetições ou rupturas.
+
+40 — Monobloco, elementos coesivos inertes.
+
+0 — Texto desconexo.
 
 🛠️ Competência V — Proposta de Intervenção
-Verifique se há proposta de intervenção detalhada e viável, com:
+Avalie se a proposta de intervenção apresenta os 5 elementos:
 
-Ação (o que será feito),
+Ação (o que será feito?),
 
-Agente (quem fará),
+Agente (quem fará?),
 
-Meio (como será feita),
+Meio (como?),
 
-Finalidade (efeito pretendido),
+Finalidade (efeito esperado),
 
-Detalhamento (exemplo, contexto, ou explicação adicional).
+Detalhamento (explicação ou contexto adicional).
 
-⚠️ Penalize propostas genéricas, incompletas ou que violam direitos humanos.
+Penalize:
 
-📊 Resultado Esperado
-Para cada competência, gere:
+Propostas vagas, incompletas ou que ferem os direitos humanos.
 
-✅ Nota de 0 a 200.
+Notas conforme INEP:
+
+200 — Todos os 5 elementos bem articulados e respeitando os direitos humanos.
+
+160 — 4 elementos presentes com coerência.
+
+120 — 3 elementos, ou com pouca articulação.
+
+80 — 2 elementos, ou proposta genérica.
+
+40 — Proposta incompleta e mal articulada.
+
+0 — Ausência de proposta ou violação de direitos humanos.
+
+📊 Resultado Final
+Ao concluir a correção:
+
+Exiba a nota de cada competência (de 0 a 200).
+
+Some o total (máximo 1000).
+
+Liste os principais erros cometidos e as recomendações de melhoria.
+
+Se algum erro parecer resultado de OCR, não penalize.
+
 IMPORTANTE: Ao final da resposta, escreva a nota total (soma das competências) no formato: "Nota Final: [valor numérico]".
-
-📌 Comentários específicos e técnicos sobre os pontos fortes e falhas.
-
-🛠️ Correções práticas com justificativas, especialmente em Competência I.
-
-💡 Dica personalizada de melhoria ao final.
 
 Texto para correção:
 ${texto}
