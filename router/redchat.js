@@ -60,14 +60,6 @@ Avalie:
 
 Ortografia, acentuação, pontuação, concordância verbal/nominal e estrutura gramatical.
 
-Para cada erro identificado:
-
-Destaque o trecho com problema.
-
-Explique o tipo de erro.
-
-Apresente a forma correta.
-
 Notas conforme INEP:
 
 200 — Sem erros, ou até 1 leve.
