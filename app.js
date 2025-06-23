@@ -10,6 +10,7 @@ import geminiRouter from './router/gemini.js';
 import redacoesRouter from './router/redacoes.js';
 import relatorioRouter from './router/relatorio.js';
 import perfilRouter from './router/perfil.js';
+import temasRouter from './router/temas.js';
 
 import dotenv from 'dotenv';
 import authMiddleware from './middlewares/auth.js'; // Novo middleware JWT
@@ -57,6 +58,7 @@ app.use('/gemini', geminiRouter);
 app.use('/redacoes', authMiddleware, redacoesRouter);
 app.use('/relatorio', relatorioRouter);
 app.use('/perfil', authMiddleware, perfilRouter);
+app.use('/temas', temasRouter);
 
 
 const PORT = process.env.PORT || 3000;

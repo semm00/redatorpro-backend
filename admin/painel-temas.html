@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel de Temas</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 20px; }
+    h1 { color: #246493; }
+    form { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    input, textarea, select, button { display: block; width: 100%; margin-bottom: 10px; padding: 8px; }
+    button { background: #246493; color: #fff; border: none; cursor: pointer; }
+    button:hover { background: #3399ff; }
+  </style>
+</head>
+<body>
+  <h1>Adicionar Novo Tema</h1>
+  <form id="form-tema">
+    <label for="tipo">Tipo de Tema:</label>
+    <select id="tipo" name="tipo">
+      <option value="ENEM">ENEM</option>
+      <option value="Vestibular">Vestibular</option>
+      <option value="Concursos">Concursos</option>
+    </select>
+
+    <label for="titulo">Título:</label>
+    <input type="text" id="titulo" name="titulo" required>
+
+    <label for="instrucoes">Instruções:</label>
+    <textarea id="instrucoes" name="instrucoes" required></textarea>
+
+    <label for="proposta">Proposta de Redação:</label>
+    <textarea id="proposta" name="proposta" required></textarea>
+
+    <label>Textos Motivadores (texto):</label>
+    <div id="textos-motivadores-container">
+      <input type="text" name="textosMotivadores" placeholder="Texto motivador">
+    </div>
+    <button type="button" onclick="adicionarCampoTexto()">Adicionar outro texto</button>
+
+    <label for="imagensMotivadoras">Textos Motivadores (imagens):</label>
+    <input type="file" id="imagensMotivadoras" name="imagensMotivadoras" multiple>
+
+    <button type="submit">Adicionar Tema</button>
+  </form>
+
+  <script>
+    function adicionarCampoTexto() {
+      const container = document.getElementById('textos-motivadores-container');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = 'textosMotivadores';
+      input.placeholder = 'Texto motivador';
+      container.appendChild(input);
+    }
+
+    document.getElementById('form-tema').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const response = await fetch('/temas', {
+        method: 'POST',
+        body: formData,
+      });
+      if (response.ok) {
+        alert('Tema adicionado com sucesso!');
+        form.reset();
+        // Remove campos extras de texto motivador
+        const container = document.getElementById('textos-motivadores-container');
+        container.innerHTML = '<input type="text" name="textosMotivadores" placeholder="Texto motivador">';
+      } else {
+        alert('Erro ao adicionar tema.');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -39,3 +39,22 @@ model Essay {
   createdAt    DateTime @default(now())
   notaTotal    Float?   // <-- campo para a nota total
 }
+
+model Tema {
+  id              Int               @id @default(autoincrement())
+  tipo            String            // Tipo de tema (ENEM, Vestibular, Concursos)
+  titulo          String            // Título do tema
+  imagem          String            // URL da imagem (armazenada no Supabase)
+  instrucoes      String            // Instruções para redação
+  proposta        String            // Proposta de redação
+  createdAt       DateTime          @default(now())
+  textosMotivadores TextoMotivador[]
+}
+
+model TextoMotivador {
+  id        Int    @id @default(autoincrement())
+  tipo      String // "texto" ou "imagem"
+  valor     String // texto motivador ou URL da imagem
+  tema      Tema   @relation(fields: [temaId], references: [id])
+  temaId    Int
+}
