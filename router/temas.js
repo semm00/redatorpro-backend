@@ -8,6 +8,13 @@ const prisma = new PrismaClient();
 const upload = multer();
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
+// Função utilitária para normalizar nomes de arquivos
+function normalizarNomeArquivo(nome) {
+  return nome
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove acentos
+    .replace(/[^a-zA-Z0-9.\-_]/g, '_'); // Substitui caracteres especiais por _
+}
+
 // Rota para listar todos os temas (com textos motivadores)
 router.get('/', async (req, res) => {
   try {
@@ -37,7 +44,8 @@ router.post(
       // Upload da imagem de capa para o Supabase
       let urlCapa = '';
       if (capaFile) {
-        const fileName = `capa_${Date.now()}_${capaFile.originalname}`;
+        const nomeNormalizado = normalizarNomeArquivo(capaFile.originalname);
+        const fileName = `capa_${Date.now()}_${nomeNormalizado}`;
         const { error } = await supabase.storage
           .from('temas')
           .upload(fileName, capaFile.buffer, { contentType: capaFile.mimetype });
@@ -48,7 +56,8 @@ router.post(
       // Upload das imagens motivadoras para o Supabase
       const imagensUrls = [];
       for (const arquivo of imagensMotivadoras) {
-        const fileName = `${Date.now()}_${arquivo.originalname}`;
+        const nomeNormalizado = normalizarNomeArquivo(arquivo.originalname);
+        const fileName = `${Date.now()}_${nomeNormalizado}`;
         const { error } = await supabase.storage
           .from('temas')
           .upload(fileName, arquivo.buffer, { contentType: arquivo.mimetype });
@@ -64,7 +73,7 @@ router.post(
           titulo,
           instrucoes,
           proposta,
-          imagem: urlCapa, // Usa a imagem de capa enviada
+          imagem: urlCapa,
         },
       });
 
