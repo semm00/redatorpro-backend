@@ -140,8 +140,8 @@ ${texto}
   }
 
   try {
-    // Usa o modelo Gemini 1.5 Flash
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Usa o modelo Gemini 2.0 Flash
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const correcao = response.text();
