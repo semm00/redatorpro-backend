@@ -59,6 +59,8 @@ palavras ilegíveis ou mal separadas,
 Avalie:
 
 Ortografia, acentuação, pontuação, concordância verbal/nominal e estrutura gramatical.
+(Nessa competência não é necessário especificar cada erro)
+IMPORTANTE: Se a redação foi digitalizada por OCR, não penalize erros que possam ter sido causados por esse processo.
 
 Notas conforme INEP:
 
