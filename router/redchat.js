@@ -67,11 +67,7 @@ Exemplo de estrutura para cada competência:
 🧠 Competência I — Domínio da Norma Culta
 Nota: 160/200
 📝 Comentário: O texto apresenta poucos erros gramaticais e ortográficos. Há desvio de acentuação em “é” e uso indevido de vírgula em construções coordenadas.
-⚠️ Erros observados:
-
-“priras” → provavelmente “provas” (erro de OCR)
-
-“não tem um suviço adequado” → "serviço" (erro possível de OCR)
+dar exemplos de erros comuns no texto, de forma breve.
 ✅ Recomendação: Praticar pontuação em orações coordenadas e revisar regras de acentuação.
 
 📚 Competência II — Compreensão da Proposta
