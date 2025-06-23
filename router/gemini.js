@@ -25,130 +25,33 @@ Atribua uma nota entre os níveis oficiais (0, 40, 80, 120, 160 ou 200).
 
 Fundamente a nota com base nos descritores oficiais do INEP.
 
-Aponte os erros específicos que justificam a redução da pontuação.
+Análise Detalhada por Competência:
 
-🧠 Competência I — Domínio da Norma Culta
-Critérios de pontuação:
+Competência 1 (Domínio da norma culta): Avalie a gramática, ortografia, pontuação e concordância.
 
-200: Sem desvios gramaticais ou com no máximo 1 desvio leve.
+Competência 2 (Compreensão do tema): Verifique se o texto aborda o tema proposto, evitando tangentes ou fuga total.
 
-160: Poucos desvios leves, sem prejudicar a leitura.
+Competência 3 (Argumentação): Analise a organização de ideias, repertório sociocultural e coerência.
 
-120: Vários desvios que não comprometem totalmente o entendimento.
+Competência 4 (Coesão): Avalie o uso de conectivos, progressão textual e estrutura lógica.
 
-80: Muitos erros que dificultam a leitura.
+Competência 5 (Proposta de intervenção): Cheque se a solução é detalhada, respeita direitos humanos e está vinculada ao tema.
 
-40: Domínio precário da norma, com trechos ininteligíveis.
+Pontos Fortes e Fracos:
 
-0: Texto anulado ou ilegível.
+Liste 3 méritos da redação (ex.: repertório relevante, boa articulação).
 
-Ação esperada da IA: Identificar todos os erros gramaticais, ortográficos e de concordância. Para cada erro:
+Liste 3 pontos a melhorar (ex.: generalizações, falta de detalhamento na proposta).
 
-Apontar o trecho.
+Notas Finais:
 
-Explicar o erro.
-
-Sugerir a forma correta.
-
-📚 Competência II — Compreensão da Proposta e Aplicação de Conhecimentos
-Critérios de pontuação:
-
-200: Tema completamente abordado com repertório legitimado e produtivo.
-
-160: Tema bem abordado, mas com uso pouco produtivo do repertório.
-
-120: Tema abordado com alguma limitação ou 1 parte embrionária.
-
-80: Abordagem incompleta ou 2 partes embrionárias.
-
-40: Tangência ao tema, uso de cópia dos textos motivadores, traços de outro tipo textual.
-
-0: Fuga ao tema ou tipo textual incorreto.
-
-Ação esperada da IA: Analisar:
-
-Se o tema foi integralmente compreendido e desenvolvido.
-
-Se houve uso de repertório legítimo e pertinente.
-
-Se a estrutura do texto tem introdução, desenvolvimento e conclusão proporcionais.
-
-🧩 Competência III — Organização da Argumentação
-Critérios de pontuação:
-
-200: Seleção e desenvolvimento autoral de ideias com encadeamento excelente.
-
-160: Organização consistente com argumentos relevantes.
-
-120: Organização previsível com argumentação limitada.
-
-80: Estrutura frágil e argumentos pouco desenvolvidos.
-
-40: Contradições, cópia dos textos motivadores, argumentação confusa.
-
-0: Texto anulado.
-
-Ação esperada da IA: Avaliar:
-
-Clareza da tese.
-
-Qualidade e progressão dos argumentos.
-
-Coerência lógica e originalidade.
-
-🔗 Competência IV — Coesão Textual
-Critérios de pontuação:
-
-200: Repertório diversificado e adequado de elementos coesivos (intra e interparágrafo).
-
-160: Poucas inadequações e boa variedade de conectivos.
-
-120: Uso razoável, mas com repetições e conectivos simples.
-
-80: Coesão precária com repetições ou lacunas.
-
-40: Conectivos inertes, justaposição de frases ou texto em monobloco.
-
-0: Texto desconexo ou ilegível.
-
-Ação esperada da IA: Identificar:
-
-Se há operadores argumentativos suficientes e bem usados.
-
-Se há conexão entre parágrafos e dentro dos parágrafos.
-
-Se há repetição excessiva ou ausência de ligação.
-
-🛠️ Competência V — Proposta de Intervenção
-Critérios de pontuação:
-
-200: Proposta completa, com os 5 elementos (ação, agente, meio, efeito e detalhamento), viável e respeitando os direitos humanos.
-
-160: 4 elementos presentes, com boa articulação.
-
-120: 3 elementos ou proposta genérica.
-
-80: 2 elementos ou intervenção vaga.
-
-40: Proposta incompleta, sem detalhamento.
-
-0: Ausência de proposta ou violação dos direitos humanos.
-
-Ação esperada da IA: Identificar:
-
-Se há proposta completa.
-
-Se os 5 elementos estão presentes e articulados.
-
-Se a proposta é viável e respeita direitos humanos.
-
-🎯 Resultado Final:
-Nota total (soma das 5 competências).
+Atribua notas individuais por competência (0-200) e a nota total (0-1000).
 IMPORTANTE: Ao final da resposta, escreva a nota total no formato: "Nota Final: [valor numérico]".
 
-Comentários explicativos e sugestões para cada competência.
+Sugestões de Melhoria:
 
-Dica personalizada de melhoria ao final.
+Ofereça recomendações específicas para elevar a nota em cada competência.
+
 Texto para correção:
 ${texto}
 `;

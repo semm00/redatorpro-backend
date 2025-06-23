@@ -37,140 +37,160 @@ router.post('/', upload.single('imagem'), async (req, res) => {
   let prompt = '';
   if (tipo === 'enem') {
     prompt = `
-    Texto para correção (Tema: ${tema}):
+Texto para correção (Tema: ${tema}):
     ${texto}
-Você é uma IA corretora de redações dissertativo-argumentativas no padrão do ENEM. Avalie o texto com base nas cinco competências da Matriz de Referência do ENEM, atribuindo notas conforme os critérios oficiais, utilizando as faixas de 0–40–80–120–160–200 pontos para cada competência, totalizando até 1000 pontos.
-
+Você é uma IA corretora de redações com base no modelo do ENEM. Avalie redações dissertativo-argumentativas com base nas cinco competências oficiais (C1 a C5), atribuindo comentários explicativos, sugestões de correção e notas de 0 a 200 para cada competência.
 Para cada competência:
-
 Atribua uma nota entre os níveis oficiais (0, 40, 80, 120, 160 ou 200).
 
-Fundamente a nota com base nos descritores oficiais do INEP.
+🧠 Competência I — Domínio da Norma Culta da Língua Portuguesa
+Avalie se o participante:
 
-Aponte os erros específicos que justificam a redução da pontuação.
+Domina a escrita formal da Língua Portuguesa.
 
-🧠 Competência I — Domínio da Norma Culta
-Critérios de pontuação:
+Cometeu erros ortográficos, de pontuação, morfossintaxe, acentuação ou concordância.
 
-200: Sem desvios gramaticais ou com no máximo 1 desvio leve.
+Para cada erro:
 
-160: Poucos desvios leves, sem prejudicar a leitura.
+Destaque o trecho com problema.
 
-120: Vários desvios que não comprometem totalmente o entendimento.
+Explique o motivo do erro (ex: "erro de concordância verbal").
 
-80: Muitos erros que dificultam a leitura.
+Apresente a forma correta.
 
-40: Domínio precário da norma, com trechos ininteligíveis.
+Exemplo:
 
-0: Texto anulado ou ilegível.
-
-Ação esperada da IA: Identificar todos os erros gramaticais, ortográficos e de concordância. Para cada erro:
-
-Apontar o trecho.
-
-Explicar o erro.
-
-Sugerir a forma correta.
+“As pessoa estão felizes.”
+✅ Correto: “As pessoas estão felizes.”
+❌ Erro: Concordância nominal no plural.
 
 📚 Competência II — Compreensão da Proposta e Aplicação de Conhecimentos
-Critérios de pontuação:
+Verifique:
 
-200: Tema completamente abordado com repertório legitimado e produtivo.
+Se a redação atende plenamente ao tema.
 
-160: Tema bem abordado, mas com uso pouco produtivo do repertório.
+Se está dentro da tipologia dissertativo-argumentativa (introdução, desenvolvimento, conclusão).
 
-120: Tema abordado com alguma limitação ou 1 parte embrionária.
+Se o repertório é legitimado (com base em áreas do conhecimento) e pertinente ao tema.
 
-80: Abordagem incompleta ou 2 partes embrionárias.
+Se evita cópias dos textos motivadores.
 
-40: Tangência ao tema, uso de cópia dos textos motivadores, traços de outro tipo textual.
+⚠️ Penalize:
 
-0: Fuga ao tema ou tipo textual incorreto.
+Fuga ao tema,
 
-Ação esperada da IA: Analisar:
+Tangência (aborda parcialmente),
 
-Se o tema foi integralmente compreendido e desenvolvido.
+Partes embrionárias (muito curtas),
 
-Se houve uso de repertório legítimo e pertinente.
+Repertório não legitimado ou improdutivo.
 
-Se a estrutura do texto tem introdução, desenvolvimento e conclusão proporcionais.
+🧩 Competência III — Organização, Argumentação e Seleção de Informações
+Avalie:
 
-🧩 Competência III — Organização da Argumentação
-Critérios de pontuação:
+Clareza do ponto de vista.
 
-200: Seleção e desenvolvimento autoral de ideias com encadeamento excelente.
+Se há seleção, organização e interpretação de ideias e dados.
 
-160: Organização consistente com argumentos relevantes.
+Se a argumentação é progressiva e coesa.
 
-120: Organização previsível com argumentação limitada.
+Se há autoridade argumentativa, não apenas opiniões soltas.
 
-80: Estrutura frágil e argumentos pouco desenvolvidos.
+⚠️ Critique:
 
-40: Contradições, cópia dos textos motivadores, argumentação confusa.
+Contradições ou repetições.
 
-0: Texto anulado.
+Cópia ou reprodução de ideias dos textos motivadores.
 
-Ação esperada da IA: Avaliar:
-
-Clareza da tese.
-
-Qualidade e progressão dos argumentos.
-
-Coerência lógica e originalidade.
+Generalizações sem sustentação.
 
 🔗 Competência IV — Coesão Textual
-Critérios de pontuação:
+Verifique o uso de:
 
-200: Repertório diversificado e adequado de elementos coesivos (intra e interparágrafo).
+Elementos coesivos inter e intraparágrafos.
 
-160: Poucas inadequações e boa variedade de conectivos.
+Operadores argumentativos (“portanto”, “além disso”, “contudo”, “logo”, etc.).
 
-120: Uso razoável, mas com repetições e conectivos simples.
+Pronomes e substituições lexicais que estabelecem continuidade.
 
-80: Coesão precária com repetições ou lacunas.
+Avalie:
 
-40: Conectivos inertes, justaposição de frases ou texto em monobloco.
+Se há diversidade e adequação no uso dos conectivos.
 
-0: Texto desconexo ou ilegível.
+Se há repetições excessivas ou inadequações (ex: conectivos mal empregados ou sem função real).
 
-Ação esperada da IA: Identificar:
+Se há coerência progressiva entre os parágrafos.
 
-Se há operadores argumentativos suficientes e bem usados.
-
-Se há conexão entre parágrafos e dentro dos parágrafos.
-
-Se há repetição excessiva ou ausência de ligação.
+⚠️ Redações com monobloco, ou com apenas justaposições de ideias, não devem ultrapassar nota 120.
 
 🛠️ Competência V — Proposta de Intervenção
-Critérios de pontuação:
+Verifique se há proposta de intervenção detalhada e viável, com:
 
-200: Proposta completa, com os 5 elementos (ação, agente, meio, efeito e detalhamento), viável e respeitando os direitos humanos.
+Ação (o que será feito),
 
-160: 4 elementos presentes, com boa articulação.
+Agente (quem fará),
 
-120: 3 elementos ou proposta genérica.
+Meio (como será feita),
 
-80: 2 elementos ou intervenção vaga.
+Finalidade (efeito pretendido),
 
-40: Proposta incompleta, sem detalhamento.
+Detalhamento (exemplo, contexto, ou explicação adicional).
 
-0: Ausência de proposta ou violação dos direitos humanos.
+⚠️ Penalize propostas genéricas, incompletas ou que violam direitos humanos.
 
-Ação esperada da IA: Identificar:
+📊 Resultado Esperado
+Para cada competência, gere:
 
-Se há proposta completa.
+✅ Nota de 0 a 200.
+IMPORTANTE: Ao final da resposta, escreva a nota total (soma das competências) no formato: "Nota Final: [valor numérico]".
 
-Se os 5 elementos estão presentes e articulados.
+📌 Comentários específicos e técnicos sobre os pontos fortes e falhas.
 
-Se a proposta é viável e respeita direitos humanos.
+🛠️ Correções práticas com justificativas, especialmente em Competência I.
 
-🎯 Resultado Final:
-Nota total (soma das 5 competências).
+💡 Dica personalizada de melhoria ao final.
+
+Texto para correção:
+${texto}
+`;
+  } else if (tipo === 'concursos') {
+    prompt = `
+    Texto para correção (Tema: ${tema}):
+    ${texto}
+Analise a redação abaixo conforme os critérios oficiais da FCC, que avalia dissertações argumentativas em três eixos principais: Conteúdo (40 pontos), Estrutura (30 pontos) e Expressão (30 pontos). A nota total é de 100 pontos.
+
+Critérios de Correção Detalhados
+1. CONTEÚDO (40 pontos)
+Avalie:
+- Perspectiva crítica: O texto apresenta uma abordagem original e bem fundamentada sobre o tema?
+- Análise e senso crítico: Há argumentação lógica, com reflexão profunda (não apenas senso comum)?
+- Consistência e coerência: Os argumentos são bem encadeados e sustentados com exemplos, dados ou referências?
+Penalizações:
+- Abordagem tangencial, superficial ou cópia de textos da prova.
+
+2. ESTRUTURA (30 pontos)
+Avalie:
+- Gênero textual: É uma dissertação argumentativa (não narrativa ou descritiva)?
+- Progressão textual: Os parágrafos seguem uma sequência lógica (introdução → desenvolvimento → conclusão)?
+- Coesão: Uso adequado de conectivos e articulação entre frases/parágrafos.
+
+3. EXPRESSÃO (30 pontos)
+Avalie:
+- Norma culta: Domínio da gramática (concordância, regência, pontuação, acentuação, etc.).
+- Clareza e precisão: Vocabulário adequado e evitou repetições ou ambiguidades?
+- Nível de linguagem: Formalidade compatível com o gênero dissertativo.
+
+Solicitações Específicas:
+Atribua notas parciais (0 a 40 para Conteúdo; 0 a 30 para Estrutura e Expressão).
+Nota final: Soma das três partes (0 a 100).
 IMPORTANTE: Ao final da resposta, escreva a nota total no formato: "Nota Final: [valor numérico]".
 
-Comentários explicativos e sugestões para cada competência.
+Destaque:
+- 2 pontos fortes (ex.: argumentação sólida, coesão eficiente).
+- 2 pontos fracos (ex.: generalizações, erros de regência).
 
-Dica personalizada de melhoria ao final.
+Sugestões de melhoria: Recomendações específicas (ex.: aprofundar um argumento, revisar concordância).
+
 Texto para correção:
 ${texto}
 `;
