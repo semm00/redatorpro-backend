@@ -55,6 +55,7 @@ model TextoMotivador {
   id        Int    @id @default(autoincrement())
   tipo      String // "texto" ou "imagem"
   valor     String // texto motivador ou URL da imagem
+  fonte     String? // <-- novo campo: fonte do texto motivador
   tema      Tema   @relation(fields: [temaId], references: [id])
   temaId    Int
 }

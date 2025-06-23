@@ -36,13 +36,19 @@
 
     <label>Textos Motivadores (texto):</label>
     <div id="textos-motivadores-container">
-      <input type="text" name="textosMotivadores" placeholder="Texto motivador">
+      <div class="texto-motivador-bloco">
+        <input type="text" name="textosMotivadores" placeholder="Texto motivador">
+        <input type="text" name="fontesMotivadores" placeholder="Fonte do texto (opcional)">
+      </div>
     </div>
     <button type="button" onclick="adicionarCampoTexto()">Adicionar outro texto</button>
 
     <label for="imagensMotivadoras">Textos Motivadores (imagens):</label>
     <div id="imagens-motivadoras-container">
-      <input type="file" name="imagensMotivadoras" accept="image/*">
+      <div class="imagem-motivadora-bloco">
+        <input type="file" name="imagensMotivadoras" accept="image/*">
+        <input type="text" name="fontesImagensMotivadoras" placeholder="Fonte da imagem (opcional)">
+      </div>
     </div>
     <button type="button" onclick="adicionarCampoImagem()">Adicionar outra imagem</button>
 
@@ -52,20 +58,24 @@
   <script>
     function adicionarCampoTexto() {
       const container = document.getElementById('textos-motivadores-container');
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.name = 'textosMotivadores';
-      input.placeholder = 'Texto motivador';
-      container.appendChild(input);
+      const bloco = document.createElement('div');
+      bloco.className = 'texto-motivador-bloco';
+      bloco.innerHTML = `
+        <input type="text" name="textosMotivadores" placeholder="Texto motivador">
+        <input type="text" name="fontesMotivadores" placeholder="Fonte do texto (opcional)">
+      `;
+      container.appendChild(bloco);
     }
 
     function adicionarCampoImagem() {
       const container = document.getElementById('imagens-motivadoras-container');
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.name = 'imagensMotivadoras';
-      input.accept = 'image/*';
-      container.appendChild(input);
+      const bloco = document.createElement('div');
+      bloco.className = 'imagem-motivadora-bloco';
+      bloco.innerHTML = `
+        <input type="file" name="imagensMotivadoras" accept="image/*">
+        <input type="text" name="fontesImagensMotivadoras" placeholder="Fonte da imagem (opcional)">
+      `;
+      container.appendChild(bloco);
     }
 
     document.getElementById('form-tema').addEventListener('submit', async (e) => {
@@ -84,18 +94,21 @@
         formData.append('capa', form.capa.files[0]);
       }
 
-      // Adiciona textos motivadores (texto)
+      // Adiciona textos motivadores (texto) e fontes
       const textos = form.querySelectorAll('input[name="textosMotivadores"]');
-      textos.forEach(input => {
+      const fontesTextos = form.querySelectorAll('input[name="fontesMotivadores"]');
+      textos.forEach((input, idx) => {
         if (input.value.trim()) formData.append('textosMotivadores', input.value);
+        // Mesmo que não tenha texto, envie fonte para manter o alinhamento dos índices
+        if (fontesTextos[idx]) formData.append('fontesMotivadores', fontesTextos[idx].value);
       });
 
-      // Adiciona textos motivadores (imagens)
+      // Adiciona textos motivadores (imagens) e fontes
       const imagensInputs = form.querySelectorAll('input[name="imagensMotivadoras"]');
-      imagensInputs.forEach(input => {
-        if (input.files.length > 0) {
-          formData.append('imagensMotivadoras', input.files[0]);
-        }
+      const fontesImagens = form.querySelectorAll('input[name="fontesImagensMotivadoras"]');
+      imagensInputs.forEach((input, idx) => {
+        if (input.files.length > 0) formData.append('imagensMotivadoras', input.files[0]);
+        if (fontesImagens[idx]) formData.append('fontesImagensMotivadoras', fontesImagens[idx].value);
       });
 
       const response = await fetch('/temas', {
@@ -105,9 +118,14 @@
       if (response.ok) {
         alert('Tema adicionado com sucesso!');
         form.reset();
-        // Remove campos extras de texto motivador
-        document.getElementById('textos-motivadores-container').innerHTML = '<input type="text" name="textosMotivadores" placeholder="Texto motivador">';
-        document.getElementById('imagens-motivadoras-container').innerHTML = '<input type="file" name="imagensMotivadoras" accept="image/*">';
+        document.getElementById('textos-motivadores-container').innerHTML = `<div class="texto-motivador-bloco">
+          <input type="text" name="textosMotivadores" placeholder="Texto motivador">
+          <input type="text" name="fontesMotivadores" placeholder="Fonte do texto (opcional)">
+        </div>`;
+        document.getElementById('imagens-motivadoras-container').innerHTML = `<div class="imagem-motivadora-bloco">
+          <input type="file" name="imagensMotivadoras" accept="image/*">
+          <input type="text" name="fontesImagensMotivadoras" placeholder="Fonte da imagem (opcional)">
+        </div>`;
       } else {
         alert('Erro ao adicionar tema.');
       }

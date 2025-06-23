@@ -40,6 +40,16 @@ router.post(
     const capaFile = req.files['capa'] ? req.files['capa'][0] : null;
     const imagensMotivadoras = req.files['imagensMotivadoras'] || [];
 
+    // Novos campos para fontes
+    // Para textos motivadores
+    let fontesMotivadores = req.body.fontesMotivadores || [];
+    // Para imagens motivadoras
+    let fontesImagensMotivadoras = req.body.fontesImagensMotivadoras || [];
+
+    // Garante que sejam arrays
+    if (typeof fontesMotivadores === 'string') fontesMotivadores = [fontesMotivadores];
+    if (typeof fontesImagensMotivadoras === 'string') fontesImagensMotivadoras = [fontesImagensMotivadoras];
+
     try {
       // Upload da imagem de capa para o Supabase
       let urlCapa = '';
@@ -82,12 +92,15 @@ router.post(
         const textos = Array.isArray(textosMotivadores)
           ? textosMotivadores
           : [textosMotivadores];
-        for (const texto of textos) {
+        for (let i = 0; i < textos.length; i++) {
+          const texto = textos[i];
+          const fonte = fontesMotivadores[i] || '';
           if (texto && texto.trim() !== '') {
             await prisma.textoMotivador.create({
               data: {
                 tipo: 'texto',
                 valor: texto,
+                fonte: fonte, // novo campo
                 temaId: tema.id,
               },
             });
@@ -96,11 +109,14 @@ router.post(
       }
 
       // Adiciona textos motivadores (imagens)
-      for (const url of imagensUrls) {
+      for (let i = 0; i < imagensUrls.length; i++) {
+        const url = imagensUrls[i];
+        const fonte = fontesImagensMotivadoras[i] || '';
         await prisma.textoMotivador.create({
           data: {
             tipo: 'imagem',
             valor: url,
+            fonte: fonte, // novo campo
             temaId: tema.id,
           },
         });
