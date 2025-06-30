@@ -250,22 +250,21 @@ ${texto}
     // LOG para depuração
     console.log('Texto da correção:', correcao);
 
-    // Regex robusto para pegar a nota final (mesmo com espaços, quebras de linha, etc)
-    // Agora busca explicitamente "Nota Final: 720" ou variantes, e só se não encontrar pega a primeira nota
+    // Regex robusto para pegar a nota final exatamente no formato "Nota Final: [valor numérico]"
     let nota = null;
-    let notaMatch = correcao.match(/nota\s*final[^0-9]{0,10}(\d{2,4})/i);
-    if (!notaMatch) {
+    let notaMatch = correcao.match(/nota\s*final\s*:\s*(-?\d+)/i);
+    if (notaMatch) {
+      nota = Number(notaMatch[1]);
+    } else {
       // Tenta variantes como "Nota total", "Nota da Redação", etc
-      notaMatch = correcao.match(/nota\s*(final|total|da reda[cç][aã]o)[^0-9]{0,10}(\d{2,4})/i);
+      notaMatch = correcao.match(/nota\s*(final|total|da reda[cç][aã]o)[^0-9\-]{0,10}(-?\d+)/i);
       if (notaMatch) {
         nota = Number(notaMatch[2]);
       }
-    } else {
-      nota = Number(notaMatch[1]);
     }
-    // Se ainda não encontrou, tenta pegar a última nota de 2-4 dígitos no texto
-    if (!nota) {
-      const allNotas = [...correcao.matchAll(/(\d{2,4})/g)].map(m => Number(m[1]));
+    // Se ainda não encontrou, tenta pegar a última nota de 1-4 dígitos no texto
+    if (nota === null) {
+      const allNotas = [...correcao.matchAll(/(-?\d{1,4})/g)].map(m => Number(m[1]));
       if (allNotas.length > 0) {
         nota = allNotas[allNotas.length - 1];
       }
