@@ -55,11 +55,12 @@
     <button type="submit">Adicionar Tema</button>
   </form>
 
-  <h2 style="margin-top:40px;">Temas Cadastrados</h2>
-  <div id="lista-temas" style="margin-bottom:40px;">
-    <!-- Lista de temas será carregada aqui -->
+  <h2 style="margin-top:40px;">Excluir Tema</h2>
+  <div id="excluir-tema-box" style="margin-bottom:40px;">
+    <input type="text" id="busca-tema" placeholder="Pesquisar tema por título..." style="margin-bottom:10px;">
+    <select id="select-tema" style="margin-bottom:10px;width:100%;"></select>
+    <button id="btn-excluir-tema" style="background:#c0392b;width:100%;">Excluir Tema Selecionado</button>
   </div>
-
   <script>
     function adicionarCampoTexto() {
       const container = document.getElementById('textos-motivadores-container');
@@ -83,46 +84,68 @@
       container.appendChild(bloco);
     }
 
+    let todosTemas = [];
+
     async function carregarTemas() {
-      const lista = document.getElementById('lista-temas');
-      lista.innerHTML = 'Carregando...';
+      const select = document.getElementById('select-tema');
+      select.innerHTML = '<option>Carregando...</option>';
       try {
         const resp = await fetch('/temas');
         if (!resp.ok) throw new Error('Erro ao buscar temas');
-        const temas = await resp.json();
-        if (!temas.length) {
-          lista.innerHTML = '<em>Nenhum tema cadastrado.</em>';
-          return;
-        }
-        lista.innerHTML = '';
-        temas.forEach(tema => {
-          const div = document.createElement('div');
-          div.style = 'background:#fff;padding:10px 15px;margin-bottom:10px;border-radius:6px;box-shadow:0 2px 4px #0001;display:flex;align-items:center;justify-content:space-between;';
-          div.innerHTML = `
-            <span><b>${tema.titulo}</b> <small style="color:#888;">(${tema.tipo})</small></span>
-            <button onclick="excluirTema(${tema.id})" style="background:#c0392b;">Excluir</button>
-          `;
-          lista.appendChild(div);
-        });
+        todosTemas = await resp.json();
+        atualizarSelectTemas('');
       } catch (e) {
-        lista.innerHTML = '<span style="color:red;">Erro ao carregar temas.</span>';
+        select.innerHTML = '<option>Erro ao carregar temas</option>';
       }
     }
 
-    async function excluirTema(id) {
-      if (!confirm('Tem certeza que deseja excluir este tema?')) return;
+    function atualizarSelectTemas(filtro) {
+      const select = document.getElementById('select-tema');
+      select.innerHTML = '';
+      const temasFiltrados = todosTemas.filter(tema =>
+        tema.titulo.toLowerCase().includes(filtro.toLowerCase())
+      );
+      if (!temasFiltrados.length) {
+        select.innerHTML = '<option disabled>Nenhum tema encontrado</option>';
+        return;
+      }
+      temasFiltrados.forEach(tema => {
+        const opt = document.createElement('option');
+        opt.value = tema.id;
+        opt.textContent = `${tema.titulo} (${tema.tipo})`;
+        select.appendChild(opt);
+      });
+    }
+
+    document.getElementById('busca-tema').addEventListener('input', function() {
+      atualizarSelectTemas(this.value);
+    });
+
+    document.getElementById('btn-excluir-tema').addEventListener('click', async function() {
+      const select = document.getElementById('select-tema');
+      const id = select.value;
+      if (!id) {
+        alert('Selecione um tema para excluir.');
+        return;
+      }
+      const tema = todosTemas.find(t => t.id == id);
+      if (!tema) {
+        alert('Tema não encontrado.');
+        return;
+      }
+      if (!confirm(`Tem certeza que deseja excluir o tema "${tema.titulo}"?`)) return;
       try {
         const resp = await fetch(`/temas/${id}`, { method: 'DELETE' });
         if (resp.ok) {
           alert('Tema excluído com sucesso!');
-          carregarTemas();
+          await carregarTemas();
         } else {
           alert('Erro ao excluir tema.');
         }
       } catch (e) {
         alert('Erro ao excluir tema.');
       }
-    }
+    });
 
     document.getElementById('form-tema').addEventListener('submit', async (e) => {
       e.preventDefault();
