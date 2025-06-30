@@ -55,6 +55,11 @@
     <button type="submit">Adicionar Tema</button>
   </form>
 
+  <h2 style="margin-top:40px;">Temas Cadastrados</h2>
+  <div id="lista-temas" style="margin-bottom:40px;">
+    <!-- Lista de temas será carregada aqui -->
+  </div>
+
   <script>
     function adicionarCampoTexto() {
       const container = document.getElementById('textos-motivadores-container');
@@ -76,6 +81,47 @@
         <input type="text" name="fontesImagensMotivadoras" placeholder="Fonte da imagem (opcional)">
       `;
       container.appendChild(bloco);
+    }
+
+    async function carregarTemas() {
+      const lista = document.getElementById('lista-temas');
+      lista.innerHTML = 'Carregando...';
+      try {
+        const resp = await fetch('/temas');
+        if (!resp.ok) throw new Error('Erro ao buscar temas');
+        const temas = await resp.json();
+        if (!temas.length) {
+          lista.innerHTML = '<em>Nenhum tema cadastrado.</em>';
+          return;
+        }
+        lista.innerHTML = '';
+        temas.forEach(tema => {
+          const div = document.createElement('div');
+          div.style = 'background:#fff;padding:10px 15px;margin-bottom:10px;border-radius:6px;box-shadow:0 2px 4px #0001;display:flex;align-items:center;justify-content:space-between;';
+          div.innerHTML = `
+            <span><b>${tema.titulo}</b> <small style="color:#888;">(${tema.tipo})</small></span>
+            <button onclick="excluirTema(${tema.id})" style="background:#c0392b;">Excluir</button>
+          `;
+          lista.appendChild(div);
+        });
+      } catch (e) {
+        lista.innerHTML = '<span style="color:red;">Erro ao carregar temas.</span>';
+      }
+    }
+
+    async function excluirTema(id) {
+      if (!confirm('Tem certeza que deseja excluir este tema?')) return;
+      try {
+        const resp = await fetch(`/temas/${id}`, { method: 'DELETE' });
+        if (resp.ok) {
+          alert('Tema excluído com sucesso!');
+          carregarTemas();
+        } else {
+          alert('Erro ao excluir tema.');
+        }
+      } catch (e) {
+        alert('Erro ao excluir tema.');
+      }
     }
 
     document.getElementById('form-tema').addEventListener('submit', async (e) => {
@@ -125,10 +171,14 @@
           <input type="file" name="imagensMotivadoras" accept="image/*">
           <input type="text" name="fontesImagensMotivadoras" placeholder="Fonte da imagem (opcional)">
         </div>`;
+        carregarTemas();
       } else {
         alert('Erro ao adicionar tema.');
       }
     });
+
+    // Chama ao carregar a página
+    carregarTemas();
   </script>
 </body>
 </html>

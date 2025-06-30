@@ -135,4 +135,20 @@ router.post(
   }
 );
 
+// Rota para excluir um tema e seus textos motivadores
+router.delete('/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+  try {
+    // Remove textos motivadores relacionados
+    await prisma.textoMotivador.deleteMany({ where: { temaId: id } });
+    // Remove o tema
+    await prisma.tema.delete({ where: { id } });
+    res.json({ mensagem: 'Tema excluído com sucesso.' });
+  } catch (err) {
+    console.error('[DELETE /temas/:id] Erro ao excluir tema:', err);
+    res.status(500).json({ error: 'Erro ao excluir tema.' });
+  }
+});
+
 export default router;
