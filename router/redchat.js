@@ -71,7 +71,7 @@ Apresente a forma correta.
 
 Notas conforme INEP:
 
-200 — Sem erros, ou até 3 leves.
+200 — Sem erros, ou até 3 erros.
 
 160 — Poucos erros leves.
 
@@ -202,7 +202,7 @@ Notas conforme INEP:
 IMPORTANTE:
 Para cada competência, faça a exibição de 
 📝 Comentário: sobre a competência
-⚠️ Erros observados: dar alguns exemplos de erros comuns no texto referente aquela competência
+⚠️ Erros observados: mostrar alguns exemplos de erros comuns no texto referente aquela competência.
 ✅ Recomendação: O que poderia ser melhorado ou corrigido referente aos erros.
 
 📊 Resultado Final
