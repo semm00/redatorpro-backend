@@ -64,6 +64,8 @@ Avalie:
 Ortografia, acentuação, pontuação, concordância verbal/nominal e estrutura gramatical.
 
 Destaque alguns (poucos) trechos com problema.
+IMPORTANTE: Se o erro for claramente causado por OCR, não penalize como erro gramatical.
+IMPORTANTE: não coloque todos os erros, apenas alguns exemplos representativos. Para que a correção não se torne excessivamente longa.
 
 Explique o tipo de erro.
 
@@ -73,7 +75,7 @@ Notas conforme INEP:
 
 200 — Sem erros, ou até 3 erros.
 
-160 — Poucos erros leves.
+160 — Poucos erros.
 
 120 — Vários erros, mas texto compreensível.
 
