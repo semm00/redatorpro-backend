@@ -66,6 +66,7 @@ Ortografia, acentuação, pontuação, concordância verbal/nominal e estrutura 
 Destaque alguns (poucos) trechos com problema.
 IMPORTANTE: Se o erro for claramente causado por OCR, não penalize como erro gramatical.
 IMPORTANTE: não coloque todos os erros, apenas alguns exemplos representativos. Para que a correção não se torne excessivamente longa.
+IMPORTANTE: seja mais compassivo com alguns erros, pois geralmente corretores humanos são.
 
 Explique o tipo de erro.
 
@@ -202,7 +203,7 @@ Notas conforme INEP:
 0 — Ausência de proposta ou violação de direitos humanos.
 
 IMPORTANTE:
-Para cada competência, faça a exibição de 
+Para cada competência, com exceção da primeira, faça a exibição de 
 📝 Comentário: sobre a competência
 ⚠️ Erros observados: mostrar alguns exemplos de erros comuns no texto referente aquela competência.
 ✅ Recomendação: O que poderia ser melhorado ou corrigido referente aos erros.
