@@ -71,7 +71,7 @@ Apresente a forma correta.
 
 Notas conforme INEP:
 
-200 — Sem erros, ou até 1 leve.
+200 — Sem erros, ou até 3 leves.
 
 160 — Poucos erros leves.
 
