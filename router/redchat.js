@@ -267,34 +267,73 @@ ${texto}
     prompt = `
     Texto para correção (Tema: ${tema}):
     ${texto}
-Avalie a redação abaixo conforme os critérios oficiais da FUVEST, atribuindo nota de 10 a 50 pontos. Siga esta estrutura:
+Você é uma inteligência artificial treinada para corrigir redações dissertativo-argumentativas no modelo da FUVEST. Corrija a redação abaixo com base nos critérios oficiais definidos no Guia FUVEST 2025.
 
-Critérios de Avaliação:
+A redação deve ser uma dissertação de caráter argumentativo, escrita em língua portuguesa padrão, com letra legível. Corrija com imparcialidade, clareza e didatismo, apresentando sua análise conforme os 3 critérios de correção, pontuando de 1 a 5 em cada critério, e gerando uma nota final de 10 a 50, após ponderação.
 
-1. Desenvolvimento do tema e organização do texto dissertativo-argumentativo:
-- Verifique se o texto é uma dissertação argumentativa e atende ao tema proposto.
-- Avalie a capacidade de compreender a proposta, relacionar ideias e informações, pertinência das informações, progressão temática e capacidade crítico-argumentativa.
-- Evite paráfrase da proposta e textos meramente expositivos.
+🧾 CRITÉRIOS DE CORREÇÃO (FUVEST)
+Para cada critério, siga esta estrutura:
 
-2. Coerência dos argumentos e articulação das partes do texto:
-- Avalie a coerência dos argumentos, organização das ideias, conclusões apropriadas, planejamento e construção significativa do texto.
-- Verifique a coesão textual, uso adequado de conectivos e relações semânticas entre as partes do texto.
+✍️ 1. Desenvolvimento do Tema e Organização do Texto
+Nota (1 a 5):
+🧠 Avaliação:
 
-3. Correção gramatical e adequação vocabular:
-- Avalie o domínio da norma-padrão da Língua Portuguesa, clareza na expressão das ideias, ortografia, morfologia, sintaxe, pontuação e vocabulário.
-- Considere precisão, concisão e adequação do vocabulário ao tipo de texto.
+O texto atende à proposta e ao gênero dissertativo-argumentativo?
 
-Notas:
-- Para cada um dos três critérios, atribua uma nota de 1 a 5.
-- Multiplique as notas por 4, 3 e 3, respectivamente, para obter a nota ponderada.
-- Some as notas ponderadas para obter a nota final (mínimo 10, máximo 50 pontos).
+Há progressão temática, com ponto de vista claro e sustentado?
+
+O repertório é pertinente, original e bem desenvolvido?
+
+Há risco de exposição superficial, paráfrase ou texto expositivo apenas?
+
+💡 Recomendação:
+Sugira ao candidato como aprofundar a argumentação e evitar lugar-comum.
+
+🔗 2. Coerência dos Argumentos e Articulação do Texto
+Nota (1 a 5):
+🧠 Avaliação:
+
+Os argumentos são organizados com lógica e clareza?
+
+As ideias evoluem sem contradições ou rupturas?
+
+Os parágrafos e períodos são bem conectados por coesão textual?
+
+💡 Recomendação:
+Oriente o candidato sobre como melhorar encadeamento e clareza das ideias.
+
+📝 3. Correção Gramatical e Adequação Vocabular
+Nota (1 a 5):
+🧠 Avaliação:
+
+O autor domina a norma-padrão da língua portuguesa?
+
+Há erros de ortografia, pontuação, concordância, regência ou acentuação?
+
+O vocabulário é preciso, adequado ao tema e ao tipo de texto?
+
+O texto evita clichês e frases feitas?
+
+💡 Recomendação:
+Aponte os principais erros linguísticos e sugira estratégias para evitá-los.
+
+🧮 CÁLCULO DA NOTA FINAL:
+Multiplique cada critério pelos seguintes pesos:
+
+Critério 1 × 4
+
+Critério 2 × 3
+
+Critério 3 × 3
+
+Nota final = (Nota1 × 4) + (Nota2 × 3) + (Nota3 × 3)
 IMPORTANTE: Ao final da resposta, escreva a nota total no formato: "Nota Final: [valor numérico]".
+Resultado: entre 10 e 50 pontos
 
-Pontos Fortes e Pontos a Melhorar:
-- Liste 2 pontos positivos e 2 aspectos que podem ser aprimorados.
+⚠️ IMPORTANTE:
+Zere a redação se ela fugir totalmente ao tema, não for uma dissertação argumentativa, estiver em branco, ou apresentar elementos incoerentes (desenhos, frases desconexas etc.).
 
-Sugestões de Melhoria:
-- Ofereça recomendações específicas para elevar a nota em cada critério.
+Se houver risco de erro por digitalização da imagem (OCR), considere que a palavra pode ter sido mal reconhecida e não penalize indevidamente.
 
 Texto para correção:
 ${texto}
