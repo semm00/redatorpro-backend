@@ -5,7 +5,10 @@ import { createClient } from '@supabase/supabase-js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
-const upload = multer();
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 } // até 5MB
+});
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_KEY
@@ -59,13 +62,18 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
   } catch {
     interesses = [];
   }
+
   // Validação backend
   let erros = [];
-  if (!name || !name.trim()) erros.push('O nome não pode ser vazio.');
-  if (instagram && !/^[a-zA-Z0-9._]+$/.test(instagram)) erros.push('O Instagram só pode conter letras, números, ponto ou underline.');
-  if (descricao && descricao.length > 200) erros.push('A descrição deve ter no máximo 200 caracteres.');
-  if (interesses.length > 8) erros.push('Máximo de 8 áreas de interesse.');
-  if (interesses.some(tag => typeof tag !== 'string' || tag.length > 20)) erros.push('Cada área de interesse deve ter até 20 caracteres.');
+  // Só exige name se NÃO for upload de foto
+  if (!req.file && (!name || !name.trim())) erros.push('O nome não pode ser vazio.');
+  // Se for apenas upload de foto, não valida outros campos
+  if (!req.file) {
+    if (instagram && !/^[a-zA-Z0-9._]+$/.test(instagram)) erros.push('O Instagram só pode conter letras, números, ponto ou underline.');
+    if (descricao && descricao.length > 200) erros.push('A descrição deve ter no máximo 200 caracteres.');
+    if (interesses.length > 8) erros.push('Máximo de 8 áreas de interesse.');
+    if (interesses.some(tag => typeof tag !== 'string' || tag.length > 20)) erros.push('Cada área de interesse deve ter até 20 caracteres.');
+  }
   if (erros.length) return res.status(400).json({ error: erros.join(' ') });
 
   let fotoPerfilUrl = null;
@@ -74,7 +82,7 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
     const fileExt = req.file.originalname.split('.').pop();
     const fileName = `${Date.now()}_${req.user.id}.${fileExt}`;
     console.log('[PUT /perfil] Upload de foto:', fileName);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .storage
       .from('perfil')
       .upload(fileName, req.file.buffer, {
@@ -88,19 +96,23 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
     fotoPerfilUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/perfil/${fileName}`;
   }
 
+  // Monta objeto de atualização dinamicamente
+  const updateData = {};
+  if (name) updateData.name = name;
+  if (instagram) updateData.instagram = instagram;
+  if (descricao) updateData.descricao = descricao;
+  if (escolaridade) updateData.escolaridade = escolaridade;
+  if (experiencia) updateData.experiencia = experiencia;
+  if (interesses) updateData.interesses = interesses;
+  if (fotoPerfilUrl) updateData.fotoPerfil = fotoPerfilUrl;
+
   try {
     const updated = await prisma.users.update({
       where: { id: req.user.id },
-      data: {
-        name,
-        instagram,
-        descricao,
-        escolaridade, // <-- ADICIONADO
-        experiencia,  // <-- ADICIONADO
-        interesses,
-        ...(fotoPerfilUrl && { fotoPerfil: fotoPerfilUrl })
-      },
-      select: { id: true, name: true, instagram: true, fotoPerfil: true, descricao: true, interesses: true, email: true, escolaridade: true, experiencia: true }
+      data: updateData,
+      select: {
+        id: true, name: true, instagram: true, fotoPerfil: true, descricao: true, interesses: true, email: true, escolaridade: true, experiencia: true
+      }
     });
     console.log('[PUT /perfil] Perfil atualizado:', updated);
     res.json(updated);
