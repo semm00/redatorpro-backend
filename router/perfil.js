@@ -23,7 +23,8 @@ router.get('/', async (req, res) => {
     const user = await prisma.users.findUnique({
       where: { id: req.user.id },
       select: {
-        id: true, name: true, email: true, tipo: true, instagram: true, fotoPerfil: true, descricao: true, interesses: true
+        id: true, name: true, email: true, tipo: true, instagram: true, fotoPerfil: true, descricao: true, interesses: true,
+        escolaridade: true, experiencia: true // <-- ADICIONADO
       }
     });
     console.log('[GET /perfil] user:', user);
@@ -48,7 +49,7 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
     console.log('[PUT /perfil] Usuário não autenticado');
     return res.status(401).json({ error: 'Não autenticado' });
   }
-  const { name, instagram, descricao } = req.body;
+  const { name, instagram, descricao, escolaridade, experiencia } = req.body;
   let interesses = [];
   try {
     if (req.body.interesses) {
@@ -94,10 +95,12 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
         name,
         instagram,
         descricao,
+        escolaridade, // <-- ADICIONADO
+        experiencia,  // <-- ADICIONADO
         interesses,
         ...(fotoPerfilUrl && { fotoPerfil: fotoPerfilUrl })
       },
-      select: { id: true, name: true, instagram: true, fotoPerfil: true, descricao: true, interesses: true, email: true }
+      select: { id: true, name: true, instagram: true, fotoPerfil: true, descricao: true, interesses: true, email: true, escolaridade: true, experiencia: true }
     });
     console.log('[PUT /perfil] Perfil atualizado:', updated);
     res.json(updated);

@@ -328,7 +328,7 @@ Critério 3 × 3
 
 Nota final = (Nota1 × 4) + (Nota2 × 3) + (Nota3 × 3)
 IMPORTANTE: Ao final da resposta, escreva a nota total no formato: "Nota Final: [valor numérico]".
-Resultado: entre 10 e 50 pontos
+Resultado: entre 10 e 50 pontos 
 
 ⚠️ IMPORTANTE:
 Zere a redação se ela fugir totalmente ao tema, não for uma dissertação argumentativa, estiver em branco, ou apresentar elementos incoerentes (desenhos, frases desconexas etc.).
