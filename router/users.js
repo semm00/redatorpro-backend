@@ -248,12 +248,19 @@ userRouter.get('/corretores-aprovados', async (req, res) => {
         escolaridade: true,
         experiencia: true,
         email: true,
-        rating: true,
+        rating: true, // <-- agora existe!
         descricao: true
       }
     });
-    res.json(Array.isArray(corretores) ? corretores : []);
+    // Garante valor padrão para rating e descricao
+    const lista = corretores.map(c => ({
+      ...c,
+      rating: typeof c.rating === 'number' ? c.rating : 0.0,
+      descricao: c.descricao || 'sem descrição'
+    }));
+    res.json(Array.isArray(lista) ? lista : []);
   } catch (err) {
+    console.error('[GET /corretores-aprovados] Erro:', err);
     res.status(500).json({ error: 'Erro ao buscar corretores aprovados.', corretores: [] });
   }
 });

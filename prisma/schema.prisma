@@ -24,6 +24,7 @@ model users {
   interesses     String[]   // novo campo: lista de áreas de interesse
   essays       Essay[]
   createdAt    DateTime @default(now()) 
+  rating        Float?   @default(0.0) // <-- novo campo para avaliação do corretor
 }
 
 model Essay {
