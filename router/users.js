@@ -252,9 +252,9 @@ userRouter.get('/corretores-aprovados', async (req, res) => {
         descricao: true
       }
     });
-    res.json(corretores);
+    res.json(Array.isArray(corretores) ? corretores : []);
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar corretores aprovados.' });
+    res.status(500).json({ error: 'Erro ao buscar corretores aprovados.', corretores: [] });
   }
 });
 
