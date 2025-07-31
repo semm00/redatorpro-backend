@@ -237,4 +237,25 @@ userRouter.post('/reenviar-verificacao', async (req, res) => {
   }
 });
 
+userRouter.get('/corretores-aprovados', async (req, res) => {
+  try {
+    const corretores = await prisma.users.findMany({
+      where: { tipo: 'corretor', aprovado: true },
+      select: {
+        id: true,
+        name: true,
+        fotoPerfil: true,
+        escolaridade: true,
+        experiencia: true,
+        email: true,
+        rating: true,
+        descricao: true
+      }
+    });
+    res.json(corretores);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar corretores aprovados.' });
+  }
+});
+
 export default userRouter;
