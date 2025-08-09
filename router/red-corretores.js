@@ -89,4 +89,34 @@ router.post('/', upload.single('imagem'), async (req, res) => {
 	}
 });
 
+// GET /red-corretores/pendentes?userId=XX - Lista redações pendentes do usuário
+router.get('/pendentes', async (req, res) => {
+	const userId = parseInt(req.query.userId, 10);
+	if (!userId) {
+		return res.status(400).json({ error: 'userId obrigatório' });
+	}
+	try {
+		const pendentes = await prisma.essay.findMany({
+			where: {
+				authorId: userId,
+				corrigidaPor: 'corretor',
+				notaTotal: null
+			},
+			orderBy: { createdAt: 'desc' }
+		});
+		// Formata para o frontend
+		const mapped = pendentes.map(e => ({
+			id: e.id,
+			tema: e.tema,
+			texto: e.text,
+			imagemUrl: e.urlImage,
+			status: 'Pendente'
+		}));
+		res.json(mapped);
+	} catch (err) {
+		console.error('[GET /red-corretores/pendentes] Erro:', err);
+		res.status(500).json({ error: 'Erro ao buscar redações pendentes.' });
+	}
+});
+
 export default router;
