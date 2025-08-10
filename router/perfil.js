@@ -198,13 +198,25 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
 
 // Perfil do estudante
 router.get('/estudante', async (req, res) => {
-  if (!req.user) return res.status(401).json({ error: 'Não autenticado' });
+  console.log('[GET /perfil/estudante] Authorization header:', req.headers.authorization);
+  console.log('[GET /perfil/estudante] req.user:', req.user);
+  if (!req.user) {
+    console.log('[GET /perfil/estudante] Usuário não autenticado');
+    return res.status(401).json({ error: 'Não autenticado' });
+  }
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
       include: { estudante: true }
     });
-    if (!user || !user.estudante) return res.status(404).json({ error: 'Estudante não encontrado.' });
+    if (!user) {
+      console.log('[GET /perfil/estudante] Usuário não encontrado no banco');
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+    if (!user.estudante) {
+      console.log('[GET /perfil/estudante] Estudante não encontrado para o usuário:', user.id);
+      return res.status(404).json({ error: 'Estudante não encontrado.' });
+    }
     const perfil = {
       id: user.id,
       name: user.name,
@@ -222,21 +234,35 @@ router.get('/estudante', async (req, res) => {
     });
     const totalRedacoes = redacoes.length;
     const ultimaNota = totalRedacoes > 0 ? redacoes[0].notaTotal : null;
+    console.log('[GET /perfil/estudante] Perfil montado:', perfil);
     res.json({ ...perfil, totalRedacoes, ultimaNota });
   } catch (err) {
+    console.error('[GET /perfil/estudante] Erro ao buscar perfil:', err);
     res.status(500).json({ error: 'Erro ao buscar perfil de estudante', details: err.message });
   }
 });
 
 // Perfil do corretor
 router.get('/corretor', async (req, res) => {
-  if (!req.user) return res.status(401).json({ error: 'Não autenticado' });
+  console.log('[GET /perfil/corretor] Authorization header:', req.headers.authorization);
+  console.log('[GET /perfil/corretor] req.user:', req.user);
+  if (!req.user) {
+    console.log('[GET /perfil/corretor] Usuário não autenticado');
+    return res.status(401).json({ error: 'Não autenticado' });
+  }
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
       include: { corretor: true }
     });
-    if (!user || !user.corretor) return res.status(404).json({ error: 'Corretor não encontrado.' });
+    if (!user) {
+      console.log('[GET /perfil/corretor] Usuário não encontrado no banco');
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+    if (!user.corretor) {
+      console.log('[GET /perfil/corretor] Corretor não encontrado para o usuário:', user.id);
+      return res.status(404).json({ error: 'Corretor não encontrado.' });
+    }
     const perfil = {
       id: user.id,
       name: user.name,
@@ -250,8 +276,10 @@ router.get('/corretor', async (req, res) => {
       aprovado: user.corretor.aprovado ?? null,
       rating: user.corretor.rating ?? null
     };
+    console.log('[GET /perfil/corretor] Perfil montado:', perfil);
     res.json(perfil);
   } catch (err) {
+    console.error('[GET /perfil/corretor] Erro ao buscar perfil:', err);
     res.status(500).json({ error: 'Erro ao buscar perfil de corretor', details: err.message });
   }
 });
