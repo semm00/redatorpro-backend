@@ -25,11 +25,31 @@ router.get('/', async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: {
-        id: true, name: true, email: true, tipo: true, instagram: true, fotoPerfil: true, descricao: true, interesses: true,
-        escolaridade: true, experiencia: true // <-- ADICIONADO
+      include: {
+        estudante: true,
+        corretor: true
       }
     });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+    // Monta resposta incluindo campos de estudante/corretor se existirem
+    const perfil = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      tipo: user.tipo,
+      fotoPerfil: user.fotoPerfil,
+      descricao: user.descricao,
+      // Estudante
+      instagram: user.estudante?.instagram || null,
+      interesses: user.estudante?.interesses || [],
+      // Corretor
+      escolaridade: user.corretor?.escolaridade || null,
+      experiencia: user.corretor?.experiencia || null,
+      rating: user.corretor?.rating ?? null,
+      aprovado: user.corretor?.aprovado ?? null
+    };
     console.log('[GET /perfil] user:', user);
     const redacoes = await prisma.essay.findMany({
       where: { authorId: req.user.id },
@@ -38,7 +58,7 @@ router.get('/', async (req, res) => {
     });
     const totalRedacoes = redacoes.length;
     const ultimaNota = totalRedacoes > 0 ? redacoes[0].notaTotal : null;
-    res.json({ ...user, totalRedacoes, ultimaNota });
+    res.json({ ...perfil, totalRedacoes, ultimaNota });
   } catch (err) {
     console.error('[GET /perfil] Erro ao buscar perfil:', err);
     res.status(500).json({ error: 'Erro ao buscar perfil', details: err.message });
