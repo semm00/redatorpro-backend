@@ -91,8 +91,10 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
   if (!req.file) {
     if (instagram && !/^[a-zA-Z0-9._]+$/.test(instagram)) erros.push('O Instagram só pode conter letras, números, ponto ou underline.');
     if (descricao && descricao.length > 200) erros.push('A descrição deve ter no máximo 200 caracteres.');
-    if (interesses.length > 8) erros.push('Máximo de 8 áreas de interesse.');
-    if (interesses.some(tag => typeof tag !== 'string' || tag.length > 20)) erros.push('Cada área de interesse deve ter até 20 caracteres.');
+    if (Array.isArray(interesses)) {
+      if (interesses.length > 8) erros.push('Máximo de 8 áreas de interesse.');
+      if (interesses.some(tag => typeof tag !== 'string' || tag.length > 20)) erros.push('Cada área de interesse deve ter até 20 caracteres.');
+    }
   }
   if (erros.length) return res.status(400).json({ error: erros.join(' ') });
 
