@@ -115,7 +115,6 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
     fotoPerfilUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/perfil/${fileName}`;
   }
 
-  // Atualiza User (apenas campos comuns)
   const updateData = {};
   if (name !== undefined) updateData.name = name;
   if (descricao !== undefined) updateData.descricao = descricao;
@@ -132,19 +131,17 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
     const estudante = await prisma.estudante.findUnique({ where: { userId: req.user.id } });
     if (estudante) {
       const estudanteUpdate = {};
-      // Só atualiza instagram se vier no request
-      if (instagram !== undefined) {
-        estudanteUpdate.instagram = instagram.trim() === "" ? null : instagram;
-      }
-      // Só atualiza interesses se vier no request
-      if (interesses !== undefined) {
-        estudanteUpdate.interesses = interesses.length ? interesses : estudante.interesses;
-      }
+      if (instagram !== undefined) estudanteUpdate.instagram = instagram.trim() === "" ? null : instagram;
+      if (interesses !== undefined) estudanteUpdate.interesses = interesses;
       if (Object.keys(estudanteUpdate).length > 0) {
-        await prisma.estudante.update({
-          where: { userId: req.user.id },
-          data: estudanteUpdate
-        });
+        try {
+          await prisma.estudante.update({
+            where: { userId: req.user.id },
+            data: estudanteUpdate
+          });
+        } catch (err) {
+          console.error('[PUT /perfil] Erro ao atualizar estudante:', err);
+        }
       }
     }
 
@@ -155,10 +152,14 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
       if (escolaridade !== undefined) corretorUpdate.escolaridade = escolaridade;
       if (experiencia !== undefined) corretorUpdate.experiencia = experiencia;
       if (Object.keys(corretorUpdate).length > 0) {
-        await prisma.corretor.update({
-          where: { userId: req.user.id },
-          data: corretorUpdate
-        });
+        try {
+          await prisma.corretor.update({
+            where: { userId: req.user.id },
+            data: corretorUpdate
+          });
+        } catch (err) {
+          console.error('[PUT /perfil] Erro ao atualizar corretor:', err);
+        }
       }
     }
 
