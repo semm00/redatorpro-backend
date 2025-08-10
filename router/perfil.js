@@ -196,4 +196,64 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
   }
 });
 
+// Perfil do estudante
+router.get('/estudante', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Não autenticado' });
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: { estudante: true }
+    });
+    if (!user || !user.estudante) return res.status(404).json({ error: 'Estudante não encontrado.' });
+    const perfil = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      tipo: user.tipo,
+      fotoPerfil: user.fotoPerfil,
+      descricao: user.descricao,
+      instagram: user.estudante.instagram || null,
+      interesses: user.estudante.interesses || [],
+    };
+    const redacoes = await prisma.essay.findMany({
+      where: { authorId: req.user.id },
+      orderBy: { createdAt: 'desc' },
+      select: { notaTotal: true }
+    });
+    const totalRedacoes = redacoes.length;
+    const ultimaNota = totalRedacoes > 0 ? redacoes[0].notaTotal : null;
+    res.json({ ...perfil, totalRedacoes, ultimaNota });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar perfil de estudante', details: err.message });
+  }
+});
+
+// Perfil do corretor
+router.get('/corretor', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Não autenticado' });
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: { corretor: true }
+    });
+    if (!user || !user.corretor) return res.status(404).json({ error: 'Corretor não encontrado.' });
+    const perfil = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      tipo: user.tipo,
+      fotoPerfil: user.fotoPerfil,
+      descricao: user.descricao,
+      escolaridade: user.corretor.escolaridade || null,
+      experiencia: user.corretor.experiencia || null,
+      certificado: user.corretor.certificado || null,
+      aprovado: user.corretor.aprovado ?? null,
+      rating: user.corretor.rating ?? null
+    };
+    res.json(perfil);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar perfil de corretor', details: err.message });
+  }
+});
+
 export default router;
