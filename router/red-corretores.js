@@ -68,13 +68,13 @@ router.post('/', authMiddleware, upload.single('imagem'), async (req, res) => {
 			const fileName = `redacao_${Date.now()}_${req.user.id}.${fileExt}`;
 			const { data, error } = await supabase
 				.storage
-				.from('redacoes')
+				.from('redator')
 				.upload(fileName, file.buffer, {
 					contentType: file.mimetype,
 					upsert: false
 				});
 			if (error) throw error;
-			urlImage = `${process.env.SUPABASE_URL}/storage/v1/object/public/redacoes/${fileName}`;
+			urlImage = `${process.env.SUPABASE_URL}/storage/v1/object/public/redator/${fileName}`;
 		} catch (err) {
 			console.error('[POST /red-corretores] Erro ao enviar imagem:', err);
 			return res.status(500).json({ error: 'Erro ao enviar imagem.' });
