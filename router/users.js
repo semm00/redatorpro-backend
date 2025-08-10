@@ -212,10 +212,29 @@ userRouter.patch('/:id/aprovar', async (req, res) => {
 
 userRouter.get('/pendentes', async (req, res) => {
   try {
+    // Busca usuários do tipo corretor que ainda não foram aprovados
     const pendentes = await prisma.user.findMany({
-      where: { tipo: 'corretor', aprovado: false }
+      where: {
+        tipo: 'corretor',
+        corretor: {
+          aprovado: false
+        }
+      },
+      include: {
+        corretor: true
+      }
     });
-    res.json(pendentes);
+    // Monta resposta incluindo campos do corretor
+    const lista = pendentes.map(u => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      experiencia: u.corretor?.experiencia || '',
+      escolaridade: u.corretor?.escolaridade || '',
+      certificado: u.corretor?.certificado || '',
+      aprovado: u.corretor?.aprovado || false
+    }));
+    res.json(lista);
   } catch (error) {
     res.status(500).json({ error: "Erro ao buscar corretores pendentes." });
   }
