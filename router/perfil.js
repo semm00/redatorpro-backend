@@ -97,7 +97,6 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
   if (erros.length) return res.status(400).json({ error: erros.join(' ') });
 
   let fotoPerfilUrl = null;
-
   if (req.file) {
     const fileExt = req.file.originalname.split('.').pop();
     const fileName = `${Date.now()}_${req.user.id}.${fileExt}`;
@@ -116,26 +115,72 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
     fotoPerfilUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/perfil/${fileName}`;
   }
 
-  // Monta objeto de atualização dinamicamente
+  // Atualiza User (apenas campos comuns)
   const updateData = {};
   if (name) updateData.name = name;
-  if (instagram) updateData.instagram = instagram;
   if (descricao) updateData.descricao = descricao;
-  if (escolaridade) updateData.escolaridade = escolaridade;
-  if (experiencia) updateData.experiencia = experiencia;
-  if (interesses) updateData.interesses = interesses;
   if (fotoPerfilUrl) updateData.fotoPerfil = fotoPerfilUrl;
 
   try {
-    const updated = await prisma.user.update({
+    // Atualiza dados comuns
+    const updatedUser = await prisma.user.update({
       where: { id: req.user.id },
       data: updateData,
       select: {
-        id: true, name: true, instagram: true, fotoPerfil: true, descricao: true, interesses: true, email: true, escolaridade: true, experiencia: true
+        id: true, name: true, fotoPerfil: true, descricao: true, email: true, tipo: true
       }
     });
-    console.log('[PUT /perfil] Perfil atualizado:', updated);
-    res.json(updated);
+
+    // Atualiza dados de estudante
+    let estudante = null;
+    if (instagram !== undefined || interesses.length) {
+      estudante = await prisma.estudante.updateMany({
+        where: { userId: req.user.id },
+        data: {
+          ...(instagram !== undefined ? { instagram } : {}),
+          ...(interesses.length ? { interesses } : {})
+        }
+      });
+    }
+
+    // Atualiza dados de corretor
+    let corretor = null;
+    if (escolaridade !== undefined || experiencia !== undefined) {
+      corretor = await prisma.corretor.updateMany({
+        where: { userId: req.user.id },
+        data: {
+          ...(escolaridade !== undefined ? { escolaridade } : {}),
+          ...(experiencia !== undefined ? { experiencia } : {})
+        }
+      });
+    }
+
+    // Busca perfil atualizado para retornar
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: {
+        estudante: true,
+        corretor: true
+      }
+    });
+
+    // Monta resposta incluindo campos de estudante/corretor se existirem
+    const perfil = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      tipo: user.tipo,
+      fotoPerfil: user.fotoPerfil,
+      descricao: user.descricao,
+      instagram: user.estudante?.instagram || null,
+      interesses: user.estudante?.interesses || [],
+      escolaridade: user.corretor?.escolaridade || null,
+      experiencia: user.corretor?.experiencia || null,
+      rating: user.corretor?.rating ?? null,
+      aprovado: user.corretor?.aprovado ?? null
+    };
+
+    res.json(perfil);
   } catch (err) {
     console.error('[PUT /perfil] Erro ao atualizar perfil:', err);
     res.status(500).json({ error: 'Erro ao atualizar perfil', details: err.message });

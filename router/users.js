@@ -97,24 +97,40 @@ userRouter.post('/', upload.single('certificado'), async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Senha criptografada, salvando usuário...");
-
+    // Cria o usuário base (apenas campos do modelo User!)
     const userSaved = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
         tipo,
-        experiencia: tipo === 'corretor' ? experiencia : null,
-        escolaridade: tipo === 'corretor' ? escolaridade : null,
-        certificado: tipo === 'corretor' ? certificadoUrl : null,
-        aprovado: tipo === 'corretor' ? false : null,
         emailVerificado: false,
-        instagram: null,
         fotoPerfil: null,
         descricao: null
       }
     });
+
+    // Cria registro em Corretor ou Estudante
+    if (tipo === 'corretor') {
+      await prisma.corretor.create({
+        data: {
+          userId: userSaved.id,
+          experiencia: experiencia || null,
+          escolaridade: escolaridade || null,
+          certificado: certificadoUrl || null,
+          aprovado: false,
+          rating: 0.0
+        }
+      });
+    } else if (tipo === 'estudante') {
+      await prisma.estudante.create({
+        data: {
+          userId: userSaved.id,
+          instagram: null,
+          interesses: []
+        }
+      });
+    }
 
     // Gera token de verificação de e-mail (expira em 1 dia)
     const emailToken = jwt.sign(
