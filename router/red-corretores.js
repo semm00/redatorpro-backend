@@ -2,6 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
 import { createClient } from '@supabase/supabase-js';
+import authMiddleware from '../middlewares/auth.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -32,7 +33,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST /red-corretores - Envia redação para um corretor
-router.post('/', upload.single('imagem'), async (req, res) => {
+router.post('/', authMiddleware, upload.single('imagem'), async (req, res) => {
 	const { tipoCorrecao, tema, texto, corretorId } = req.body;
 	const file = req.file;
 	if (!req.user) {

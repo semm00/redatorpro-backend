@@ -60,7 +60,7 @@ app.use('/redacoes', authMiddleware, redacoesRouter);
 app.use('/relatorio', relatorioRouter);
 app.use('/perfil', authMiddleware, perfilRouter);
 app.use('/temas', temasRouter);
-app.use('/red-corretores', authMiddleware, redCorretoresRouter);
+app.use('/red-corretores', redCorretoresRouter);
 
 
 const PORT = process.env.PORT || 3000;
