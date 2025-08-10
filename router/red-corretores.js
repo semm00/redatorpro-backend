@@ -50,6 +50,10 @@ router.post('/', authMiddleware, upload.single('imagem'), async (req, res) => {
 	if (!corretorId) {
 		return res.status(400).json({ error: 'Corretor não informado.' });
 	}
+	const corretorIdNum = parseInt(corretorId, 10);
+	if (isNaN(corretorIdNum)) {
+		return res.status(400).json({ error: 'corretorId inválido.' });
+	}
 	if ((!texto || !texto.trim()) && !file) {
 		return res.status(400).json({ error: 'Envie o texto digitado OU a imagem da redação.' });
 	}
@@ -87,7 +91,7 @@ router.post('/', authMiddleware, upload.single('imagem'), async (req, res) => {
 				corrigidaPor: 'corretor',
 				tipoCorrecao,
 				tema,
-				// Adicione outros campos se necessário
+				corretorId: corretorIdNum // adicionado para permitir recuperar nome depois
 			}
 		});
 		// Aqui você pode criar uma notificação para o corretor, se desejar
