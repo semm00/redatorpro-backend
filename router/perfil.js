@@ -123,39 +123,36 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
 
   try {
     // Atualiza dados comuns
-    const updatedUser = await prisma.user.update({
+    await prisma.user.update({
       where: { id: req.user.id },
-      data: updateData,
-      select: {
-        id: true, name: true, fotoPerfil: true, descricao: true, email: true, tipo: true
-      }
+      data: updateData
     });
 
-    // Atualiza dados de estudante
-    let estudante = null;
-    if (instagram !== undefined || interesses.length) {
-      estudante = await prisma.estudante.updateMany({
+    // Atualiza dados de estudante (se existir)
+    const estudante = await prisma.estudante.findUnique({ where: { userId: req.user.id } });
+    if (estudante) {
+      await prisma.estudante.update({
         where: { userId: req.user.id },
         data: {
-          ...(instagram !== undefined ? { instagram } : {}),
-          ...(interesses.length ? { interesses } : {})
+          instagram: instagram !== undefined ? instagram : estudante.instagram,
+          interesses: interesses.length ? interesses : estudante.interesses
         }
       });
     }
 
-    // Atualiza dados de corretor
-    let corretor = null;
-    if (escolaridade !== undefined || experiencia !== undefined) {
-      corretor = await prisma.corretor.updateMany({
+    // Atualiza dados de corretor (se existir)
+    const corretor = await prisma.corretor.findUnique({ where: { userId: req.user.id } });
+    if (corretor) {
+      await prisma.corretor.update({
         where: { userId: req.user.id },
         data: {
-          ...(escolaridade !== undefined ? { escolaridade } : {}),
-          ...(experiencia !== undefined ? { experiencia } : {})
+          escolaridade: escolaridade !== undefined ? escolaridade : corretor.escolaridade,
+          experiencia: experiencia !== undefined ? experiencia : corretor.experiencia
         }
       });
     }
 
-    // Busca perfil atualizado para retornar
+    // Busca perfil atualizado para retornar sempre os dados completos
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
       include: {
@@ -164,7 +161,6 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
       }
     });
 
-    // Monta resposta incluindo campos de estudante/corretor se existirem
     const perfil = {
       id: user.id,
       name: user.name,
