@@ -14,9 +14,10 @@ router.post('/', async (req, res) => {  // Rota para login
   }
 
   try {
-    // Use prisma.user.findUnique pois o modelo agora é User
+    // Busca o usuário
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
+      include: { corretor: true }
     });
 
     if (!user) {
@@ -28,8 +29,8 @@ router.post('/', async (req, res) => {  // Rota para login
       return res.status(401).json({ error: "Senha incorreta." });
     }
 
-    if (user.tipo === 'corretor' && user.aprovado === false) {
-    return res.status(403).json({ error: "Seu cadastro de corretor ainda não foi aprovado." });
+    if (user.tipo === 'corretor' && user.corretor && user.corretor.aprovado === false) {
+      return res.status(403).json({ error: "Seu cadastro de corretor ainda não foi aprovado." });
     }
 
     if (!user.emailVerificado) {

@@ -12,20 +12,28 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 // GET /red-corretores - Lista todos os corretores aprovados
 router.get('/', async (req, res) => {
 	try {
-		const corretores = await prisma.users.findMany({
-			where: { tipo: 'corretor', aprovado: true },
-			select: {
-				id: true,
-				name: true,
-				fotoPerfil: true,
-				escolaridade: true,
-				experiencia: true,
-				email: true,
-				rating: true,
-				descricao: true
+		const corretores = await prisma.user.findMany({
+			where: {
+				tipo: 'corretor',
+				corretor: {
+					aprovado: true
+				}
+			},
+			include: {
+				corretor: true
 			}
 		});
-		res.json(Array.isArray(corretores) ? corretores : []);
+		const lista = corretores.map(c => ({
+			id: c.id,
+			name: c.name,
+			fotoPerfil: c.fotoPerfil,
+			escolaridade: c.corretor?.escolaridade || '',
+			experiencia: c.corretor?.experiencia || '',
+			email: c.email,
+			rating: typeof c.corretor?.rating === 'number' ? c.corretor.rating : 0.0,
+			descricao: c.descricao || 'sem descrição'
+		}));
+		res.json(Array.isArray(lista) ? lista : []);
 	} catch (err) {
 		console.error('[GET /red-corretores] Erro:', err);
 		res.status(500).json({ error: 'Erro ao buscar corretores.' });

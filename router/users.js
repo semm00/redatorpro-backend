@@ -200,11 +200,13 @@ userRouter.get('/verificar-email', async (req, res) => {
 
 userRouter.patch('/:id/aprovar', async (req, res) => {
   try {
-    const user = await prisma.user.update({
-      where: { id: Number(req.params.id) },
+    // Atualiza o campo aprovado na tabela Corretor, não mais em User
+    const userId = Number(req.params.id);
+    const corretor = await prisma.corretor.update({
+      where: { userId },
       data: { aprovado: true }
     });
-    res.json({ message: "Corretor aprovado com sucesso!", user });
+    res.json({ message: "Corretor aprovado com sucesso!", corretor });
   } catch (error) {
     res.status(500).json({ error: "Erro ao aprovar corretor." });
   }
@@ -274,23 +276,27 @@ userRouter.post('/reenviar-verificacao', async (req, res) => {
 
 userRouter.get('/corretores-aprovados', async (req, res) => {
   try {
+    // Busca usuários do tipo corretor que estão aprovados, incluindo dados do corretor
     const corretores = await prisma.user.findMany({
-      where: { tipo: 'corretor', aprovado: true },
-      select: {
-        id: true,
-        name: true,
-        fotoPerfil: true,
-        escolaridade: true,
-        experiencia: true,
-        email: true,
-        rating: true, // <-- agora existe!
-        descricao: true
+      where: {
+        tipo: 'corretor',
+        corretor: {
+          aprovado: true
+        }
+      },
+      include: {
+        corretor: true
       }
     });
-    // Garante valor padrão para rating e descricao
+    // Monta resposta incluindo campos do corretor
     const lista = corretores.map(c => ({
-      ...c,
-      rating: typeof c.rating === 'number' ? c.rating : 0.0,
+      id: c.id,
+      name: c.name,
+      fotoPerfil: c.fotoPerfil,
+      escolaridade: c.corretor?.escolaridade || '',
+      experiencia: c.corretor?.experiencia || '',
+      email: c.email,
+      rating: typeof c.corretor?.rating === 'number' ? c.corretor.rating : 0.0,
       descricao: c.descricao || 'sem descrição'
     }));
     res.json(Array.isArray(lista) ? lista : []);

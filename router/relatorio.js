@@ -6,14 +6,14 @@ const prisma = new PrismaClient();
 
 router.get('/', async (req, res) => {
   try {
-    const usersWithEssays = await prisma.users.findMany({
+    const usersWithEssays = await prisma.user.findMany({
       select: {
         id: true,
         name: true,
         email: true,
         tipo: true,
         createdAt: true,
-        essays: {
+        redacoesAutor: {
           select: { id: true, createdAt: true }
         }
       }
@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
     fifteenDaysAgo.setDate(now.getDate() - 15);
 
     // Busca todos os usuários criados nos últimos 15 dias
-    const cadastros = await prisma.users.findMany({
+    const cadastros = await prisma.user.findMany({
       where: {
         createdAt: { gte: fifteenDaysAgo }
       },
@@ -52,7 +52,7 @@ router.get('/', async (req, res) => {
 
     const usuarios = usersWithEssays.map(u => {
       // Ordena as redações por data decrescente
-      const sortedEssays = [...u.essays].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const sortedEssays = [...u.redacoesAutor].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       const ultimaRedacao = sortedEssays.length > 0 ? sortedEssays[0].createdAt : null;
       return {
         id: u.id,
@@ -60,8 +60,8 @@ router.get('/', async (req, res) => {
         email: u.email,
         tipo: u.tipo,
         dataCadastro: u.createdAt,
-        totalRedacoes: u.essays.length,
-        redacoesUltimaSemana: u.essays.filter(e => new Date(e.createdAt) > oneWeekAgo).length,
+        totalRedacoes: u.redacoesAutor.length,
+        redacoesUltimaSemana: u.redacoesAutor.filter(e => new Date(e.createdAt) > oneWeekAgo).length,
         dataUltimaRedacao: ultimaRedacao
       };
     });
