@@ -7,56 +7,76 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model users {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  name         String
-  password     String
-  tipo         String   // "estudante" ou "corretor"
-  experiencia  String?  // só para corretor
-  escolaridade String?  // só para corretor
-  certificado  String?  // só para corretor (URL ou nome do arquivo)
-  aprovado     Boolean? @default(false) // só para corretor
-  emailVerificado Boolean @default(false) // <-- novo campo
-  instagram      String?    // novo campo
-  fotoPerfil     String?    // novo campo
-  descricao      String?    // novo campo
-  interesses     String[]   // novo campo: lista de áreas de interesse
-  essays       Essay[]
-  createdAt    DateTime @default(now()) 
-  rating        Float?   @default(0.0) // <-- novo campo para avaliação do corretor
+model User {
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  name           String
+  password       String
+  tipo           String   // "estudante" ou "corretor"
+  emailVerificado Boolean @default(false)
+  fotoPerfil     String?
+  descricao      String?
+  createdAt      DateTime @default(now())
+  // Relações
+  redacoesAutor      Essay[]    @relation("RedacoesAutor")
+  redacoesCorrigidas Essay[]    @relation("RedacoesCorretor")
+  corretor           Corretor?
+  estudante          Estudante?
+  @@map("users") // <-- Adicione esta linha
+}
+
+model Corretor {
+  id           Int    @id @default(autoincrement())
+  userId       Int    @unique
+  user         User   @relation(fields: [userId], references: [id])
+  experiencia  String?
+  escolaridade String?
+  certificado  String?
+  aprovado     Boolean? @default(false)
+  rating       Float?   @default(0.0) // <-- agora só aqui
+}
+
+model Estudante {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  user        User     @relation(fields: [userId], references: [id])
+  instagram   String?
+  interesses  String[]
+  // Adicione outros campos exclusivos do estudante aqui, se houver
 }
 
 model Essay {
   id           Int      @id @default(autoincrement())
   text         String?
   urlImage     String?
-  author       users    @relation(fields: [authorId], references: [id])
   authorId     Int
-  corrigidaPor String?  // "ia" ou "corretor"
-  correcaoIa   String?  // resposta da IA, se houver
-  tipoCorrecao String?  // tipo de correção (opcional)
-  tema         String?  // tema da redação (opcional)
+  author       User     @relation("RedacoesAutor", fields: [authorId], references: [id])
+  corretorId   Int?
+  corretor     User?    @relation("RedacoesCorretor", fields: [corretorId], references: [id])
+  corrigidaPor String?
+  correcaoIa   String?
+  tipoCorrecao String?
+  tema         String?
   createdAt    DateTime @default(now())
-  notaTotal    Float?   // <-- campo para a nota total
+  notaTotal    Float?
 }
 
 model Tema {
-  id              Int               @id @default(autoincrement())
-  tipo            String            // Tipo de tema (ENEM, Vestibular, Concursos)
-  titulo          String            // Título do tema
-  imagem          String            // URL da imagem (armazenada no Supabase)
-  instrucoes      String            // Instruções para redação
-  proposta        String            // Proposta de redação
-  createdAt       DateTime          @default(now())
+  id                Int               @id @default(autoincrement())
+  tipo              String
+  titulo            String
+  imagem            String
+  instrucoes        String
+  proposta          String
+  createdAt         DateTime          @default(now())
   textosMotivadores TextoMotivador[]
 }
 
 model TextoMotivador {
   id        Int    @id @default(autoincrement())
-  tipo      String // "texto" ou "imagem"
-  valor     String // texto motivador ou URL da imagem
-  fonte     String? // <-- novo campo: fonte do texto motivador
-  tema      Tema   @relation(fields: [temaId], references: [id])
+  tipo      String
+  valor     String
+  fonte     String?
   temaId    Int
+  tema      Tema   @relation(fields: [temaId], references: [id])
 }

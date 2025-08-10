@@ -104,8 +104,7 @@ router.get('/pendentes', async (req, res) => {
 			},
 			orderBy: { createdAt: 'desc' },
 			include: {
-				// Busca o corretor se possível (se você tiver relação, ajuste aqui)
-				// Exemplo: corretor: true
+				corretor: { select: { name: true } } // Supondo que existe relação corretorId -> users
 			}
 		});
 		const mapped = essays.map(e => ({
@@ -116,7 +115,7 @@ router.get('/pendentes', async (req, res) => {
 			status: e.notaTotal !== undefined && e.notaTotal !== null ? 'Corrigida' : 'Pendente',
 			notaTotal: e.notaTotal,
 			createdAt: e.createdAt,
-			// corretorNome: e.corretor ? e.corretor.name : undefined // descomente se houver relação
+			corretorNome: e.corretor ? e.corretor.name : undefined
 		}));
 		res.json(mapped);
 	} catch (err) {
