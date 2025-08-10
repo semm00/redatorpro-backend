@@ -99,7 +99,7 @@ userRouter.post('/', upload.single('certificado'), async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log("Senha criptografada, salvando usuário...");
 
-    const userSaved = await prisma.users.create({
+    const userSaved = await prisma.user.create({
       data: {
         name,
         email,
@@ -160,7 +160,7 @@ userRouter.get('/verificar-email', async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Busca o usuário antes de atualizar
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: decoded.id }
     });
 
@@ -169,7 +169,7 @@ userRouter.get('/verificar-email', async (req, res) => {
     }
     // Só atualiza se ainda não estiver verificado
     if (!user.emailVerificado) {
-      await prisma.users.update({
+      await prisma.user.update({
         where: { id: decoded.id },
         data: { emailVerificado: true }
       });
@@ -184,7 +184,7 @@ userRouter.get('/verificar-email', async (req, res) => {
 
 userRouter.patch('/:id/aprovar', async (req, res) => {
   try {
-    const user = await prisma.users.update({
+    const user = await prisma.user.update({
       where: { id: Number(req.params.id) },
       data: { aprovado: true }
     });
@@ -196,7 +196,7 @@ userRouter.patch('/:id/aprovar', async (req, res) => {
 
 userRouter.get('/pendentes', async (req, res) => {
   try {
-    const pendentes = await prisma.users.findMany({
+    const pendentes = await prisma.user.findMany({
       where: { tipo: 'corretor', aprovado: false }
     });
     res.json(pendentes);
@@ -207,7 +207,7 @@ userRouter.get('/pendentes', async (req, res) => {
 
 userRouter.patch('/:id/reprovar', async (req, res) => {
   try {
-    await prisma.users.delete({
+    await prisma.user.delete({
       where: { id: Number(req.params.id) }
     });
     res.json({ message: "Corretor removido com sucesso!" });
@@ -220,7 +220,7 @@ userRouter.post('/reenviar-verificacao', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "E-mail não fornecido." });
   try {
-    const user = await prisma.users.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(404).json({ error: "Usuário não encontrado." });
     if (user.emailVerificado) return res.status(400).json({ error: "E-mail já verificado." });
 
@@ -239,7 +239,7 @@ userRouter.post('/reenviar-verificacao', async (req, res) => {
 
 userRouter.get('/corretores-aprovados', async (req, res) => {
   try {
-    const corretores = await prisma.users.findMany({
+    const corretores = await prisma.user.findMany({
       where: { tipo: 'corretor', aprovado: true },
       select: {
         id: true,

@@ -14,8 +14,8 @@ router.post('/', async (req, res) => {  // Rota para login
   }
 
   try {
-    // Use prisma.users.findUnique se o modelo estiver nomeado como "users" no Prisma schema
-    const user = await prisma.users.findUnique({
+    // Use prisma.user.findUnique pois o modelo agora é User
+    const user = await prisma.user.findUnique({
       where: { email }
     });
 
