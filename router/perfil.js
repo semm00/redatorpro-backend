@@ -73,9 +73,9 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
     return res.status(401).json({ error: 'Não autenticado' });
   }
   const { name, instagram, descricao, escolaridade, experiencia } = req.body;
-  let interesses = [];
+  let interesses = undefined;
   try {
-    if (req.body.interesses) {
+    if (req.body.interesses !== undefined) {
       interesses = JSON.parse(req.body.interesses);
       if (!Array.isArray(interesses)) interesses = [];
     }
@@ -117,8 +117,8 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
 
   // Atualiza User (apenas campos comuns)
   const updateData = {};
-  if (name) updateData.name = name;
-  if (descricao) updateData.descricao = descricao;
+  if (name !== undefined) updateData.name = name;
+  if (descricao !== undefined) updateData.descricao = descricao;
   if (fotoPerfilUrl) updateData.fotoPerfil = fotoPerfilUrl;
 
   try {
@@ -131,25 +131,35 @@ router.put('/', upload.single('fotoPerfil'), async (req, res) => {
     // Atualiza dados de estudante (se existir)
     const estudante = await prisma.estudante.findUnique({ where: { userId: req.user.id } });
     if (estudante) {
-      await prisma.estudante.update({
-        where: { userId: req.user.id },
-        data: {
-          instagram: instagram !== undefined ? instagram : estudante.instagram,
-          interesses: interesses.length ? interesses : estudante.interesses
-        }
-      });
+      const estudanteUpdate = {};
+      // Só atualiza instagram se vier no request
+      if (instagram !== undefined) {
+        estudanteUpdate.instagram = instagram.trim() === "" ? null : instagram;
+      }
+      // Só atualiza interesses se vier no request
+      if (interesses !== undefined) {
+        estudanteUpdate.interesses = interesses.length ? interesses : estudante.interesses;
+      }
+      if (Object.keys(estudanteUpdate).length > 0) {
+        await prisma.estudante.update({
+          where: { userId: req.user.id },
+          data: estudanteUpdate
+        });
+      }
     }
 
     // Atualiza dados de corretor (se existir)
     const corretor = await prisma.corretor.findUnique({ where: { userId: req.user.id } });
     if (corretor) {
-      await prisma.corretor.update({
-        where: { userId: req.user.id },
-        data: {
-          escolaridade: escolaridade !== undefined ? escolaridade : corretor.escolaridade,
-          experiencia: experiencia !== undefined ? experiencia : corretor.experiencia
-        }
-      });
+      const corretorUpdate = {};
+      if (escolaridade !== undefined) corretorUpdate.escolaridade = escolaridade;
+      if (experiencia !== undefined) corretorUpdate.experiencia = experiencia;
+      if (Object.keys(corretorUpdate).length > 0) {
+        await prisma.corretor.update({
+          where: { userId: req.user.id },
+          data: corretorUpdate
+        });
+      }
     }
 
     // Busca perfil atualizado para retornar sempre os dados completos
