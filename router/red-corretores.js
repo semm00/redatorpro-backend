@@ -102,24 +102,20 @@ router.post('/', authMiddleware, upload.single('imagem'), async (req, res) => {
 	}
 });
 
-// GET /red-corretores/solicitacoes - solicitações destinadas ao corretor autenticado
+// NOVO: GET /red-corretores/solicitacoes - solicitações destinadas ao corretor autenticado
 router.get('/solicitacoes', authMiddleware, async (req, res) => {
 	try {
-		// req.user.id é o ID do usuário (corretor) autenticado
 		const corretorId = req.user?.id;
-		if (!corretorId) {
-			return res.status(401).json({ error: 'Não autenticado.' });
-		}
+		if (!corretorId) return res.status(401).json({ error: 'Não autenticado.' });
+
 		const essays = await prisma.essay.findMany({
-			where: {
-				corrigidaPor: 'corretor',
-				corretorId: corretorId
-			},
+			where: { corrigidaPor: 'corretor', corretorId: corretorId },
 			orderBy: { createdAt: 'asc' }, // mais antiga -> mais recente
 			include: {
-				author: { select: { id: true, name: true, email: true, fotoPerfil: true } }
+				author: { select: { id: true, name: true, fotoPerfil: true } }
 			}
 		});
+
 		const mapped = essays.map(e => ({
 			id: e.id,
 			createdAt: e.createdAt,
@@ -131,10 +127,10 @@ router.get('/solicitacoes', authMiddleware, async (req, res) => {
 			aluno: e.author ? {
 				id: e.author.id,
 				name: e.author.name,
-				email: e.author.email,
 				fotoPerfil: e.author.fotoPerfil
 			} : null
 		}));
+
 		return res.json(mapped);
 	} catch (err) {
 		console.error('[GET /red-corretores/solicitacoes] Erro:', err);
