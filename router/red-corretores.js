@@ -102,6 +102,46 @@ router.post('/', authMiddleware, upload.single('imagem'), async (req, res) => {
 	}
 });
 
+// GET /red-corretores/solicitacoes - solicitações destinadas ao corretor autenticado
+router.get('/solicitacoes', authMiddleware, async (req, res) => {
+	try {
+		// req.user.id é o ID do usuário (corretor) autenticado
+		const corretorId = req.user?.id;
+		if (!corretorId) {
+			return res.status(401).json({ error: 'Não autenticado.' });
+		}
+		const essays = await prisma.essay.findMany({
+			where: {
+				corrigidaPor: 'corretor',
+				corretorId: corretorId
+			},
+			orderBy: { createdAt: 'asc' }, // mais antiga -> mais recente
+			include: {
+				author: { select: { id: true, name: true, email: true, fotoPerfil: true } }
+			}
+		});
+		const mapped = essays.map(e => ({
+			id: e.id,
+			createdAt: e.createdAt,
+			tipoCorrecao: e.tipoCorrecao,
+			tema: e.tema,
+			texto: e.text,
+			imagemUrl: e.urlImage,
+			status: e.notaTotal !== undefined && e.notaTotal !== null ? 'Corrigida' : 'Pendente',
+			aluno: e.author ? {
+				id: e.author.id,
+				name: e.author.name,
+				email: e.author.email,
+				fotoPerfil: e.author.fotoPerfil
+			} : null
+		}));
+		return res.json(mapped);
+	} catch (err) {
+		console.error('[GET /red-corretores/solicitacoes] Erro:', err);
+		return res.status(500).json({ error: 'Erro ao buscar solicitações.' });
+	}
+});
+
 // GET /red-corretores/pendentes?userId=XX - Lista redações enviadas para corretores (pendentes e corrigidas)
 router.get('/pendentes', async (req, res) => {
 	const userId = parseInt(req.query.userId, 10);
