@@ -23,6 +23,7 @@ model User {
   corretor           Corretor?
   estudante          Estudante?
   @@map("users") // <-- Adicione esta linha
+  Correction Correction[]
 }
 
 model Corretor {
@@ -59,6 +60,39 @@ model Essay {
   tema         String?
   createdAt    DateTime @default(now())
   notaTotal    Float?
+  // NOVO: relação com correções
+  corrections  Correction[]
+}
+
+model Correction {
+  id                Int          @id @default(autoincrement())
+  essayId           Int
+  essay             Essay        @relation(fields: [essayId], references: [id])
+  corretorId        Int
+  corretor          User         @relation(fields: [corretorId], references: [id])
+  notas             Json?
+  notaTotal         Float?
+  comentariosGerais String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  annotations       Annotation[]
+}
+
+model Annotation {
+  id           Int        @id @default(autoincrement())
+  correctionId Int
+  correction   Correction @relation(fields: [correctionId], references: [id])
+  tipo         String     // 'texto' | 'imagem'
+  // Texto:
+  rangeStart   Int?
+  rangeEnd     Int?
+  snippet      String?
+  // Imagem:
+  rects        Json?      // [{x,y,w,h}]
+  // Comum:
+  color        String?
+  comment      String?
+  createdAt    DateTime   @default(now())
 }
 
 model Tema {

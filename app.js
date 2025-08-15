@@ -12,6 +12,7 @@ import relatorioRouter from './router/relatorio.js';
 import perfilRouter from './router/perfil.js';
 import temasRouter from './router/temas.js';
 import redCorretoresRouter from './router/red-corretores.js';
+import correcaoRouter from './router/correcao.js';
 
 import dotenv from 'dotenv';
 import authMiddleware from './middlewares/auth.js'; // Novo middleware JWT
@@ -61,6 +62,7 @@ app.use('/relatorio', relatorioRouter);
 app.use('/perfil', authMiddleware, perfilRouter);
 app.use('/temas', temasRouter);
 app.use('/red-corretores', redCorretoresRouter);
+app.use('/correcao', authMiddleware, correcaoRouter);
 
 
 const PORT = process.env.PORT || 3000;
