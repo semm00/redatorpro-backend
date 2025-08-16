@@ -118,4 +118,52 @@ router.post('/:essayId', authMiddleware, async (req, res) => {
   }
 });
 
+// NOVO: GET /correcao/aluno/:essayId - aluno (autor) visualiza a correção consolidada
+router.get('/aluno/:essayId', authMiddleware, async (req, res) => {
+  const essayId = parseInt(req.params.essayId, 10);
+  if (!essayId) return res.status(400).json({ error: 'ID inválido.' });
+  try {
+    const essay = await prisma.essay.findUnique({
+      where: { id: essayId },
+      include: {
+        author: { select: { id: true, name: true, email: true, fotoPerfil: true } },
+        corretor: { select: { id: true, name: true, fotoPerfil: true } }
+      }
+    });
+    if (!essay) return res.status(404).json({ error: 'Redação não encontrada.' });
+    if (essay.authorId !== req.user.id) return res.status(403).json({ error: 'Acesso negado.' });
+
+    // Pega a correção mais recente (se houver)
+    const correction = await prisma.correction.findFirst({
+      where: { essayId: essay.id },
+      orderBy: { updatedAt: 'desc' },
+      include: { annotations: true, corretor: { select: { id: true, name: true, fotoPerfil: true } } }
+    });
+
+    return res.json({
+      essay: {
+        id: essay.id,
+        tema: essay.tema,
+        tipoCorrecao: essay.tipoCorrecao,
+        createdAt: essay.createdAt,
+        texto: essay.text,
+        imagemUrl: essay.urlImage,
+        notaTotal: essay.notaTotal ?? correction?.notaTotal ?? null
+      },
+      correction: correction ? {
+        id: correction.id,
+        notas: correction.notas || null,
+        notaTotal: correction.notaTotal ?? null,
+        comentariosGerais: correction.comentariosGerais || '',
+        updatedAt: correction.updatedAt,
+        corretor: correction.corretor || essay.corretor || null,
+        annotations: correction.annotations || []
+      } : null
+    });
+  } catch (e) {
+    console.error('[GET /correcao/aluno/:essayId]', e);
+    return res.status(500).json({ error: 'Erro ao carregar correção.' });
+  }
+});
+
 export default router;
