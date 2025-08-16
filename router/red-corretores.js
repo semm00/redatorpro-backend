@@ -163,12 +163,37 @@ router.get('/pendentes', async (req, res) => {
 			status: e.notaTotal !== undefined && e.notaTotal !== null ? 'Corrigida' : 'Pendente',
 			notaTotal: e.notaTotal,
 			createdAt: e.createdAt,
-			corretorNome: e.corretor ? e.corretor.name : undefined
+			corretorNome: e.corretor ? e.corretor.name : undefined,
+			// NOVO: status persistente de visualização pelo autor
+			visualizada: e.correcaoVisualizada === true
 		}));
 		res.json(mapped);
 	} catch (err) {
 		console.error('[GET /red-corretores/pendentes] Erro:', err);
 		res.status(500).json({ error: 'Erro ao buscar redações pendentes.' });
+	}
+});
+
+// NOVO: PATCH /red-corretores/:id/visualizada - marca correção como visualizada pelo autor
+router.patch('/:id/visualizada', authMiddleware, async (req, res) => {
+	try {
+		const essayId = parseInt(req.params.id, 10);
+		if (!essayId) return res.status(400).json({ error: 'ID inválido.' });
+
+		// Garante que o usuário logado é o autor da redação
+		const essay = await prisma.essay.findUnique({ where: { id: essayId }, select: { authorId: true } });
+		if (!essay) return res.status(404).json({ error: 'Redação não encontrada.' });
+		if (essay.authorId !== req.user.id) return res.status(403).json({ error: 'Acesso negado.' });
+
+		const updated = await prisma.essay.update({
+			where: { id: essayId },
+			data: { correcaoVisualizada: true, correcaoVisualizadaEm: new Date() },
+			select: { id: true, correcaoVisualizada: true, correcaoVisualizadaEm: true }
+		});
+		return res.json(updated);
+	} catch (err) {
+		console.error('[PATCH /red-corretores/:id/visualizada] Erro:', err);
+		return res.status(500).json({ error: 'Erro ao marcar como visualizada.' });
 	}
 });
 

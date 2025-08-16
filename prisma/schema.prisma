@@ -60,6 +60,9 @@ model Essay {
   tema         String?
   createdAt    DateTime @default(now())
   notaTotal    Float?
+  // NOVO: flags de visualização pelo autor
+  correcaoVisualizada   Boolean   @default(false)
+  correcaoVisualizadaEm DateTime?
   // NOVO: relação com correções
   corrections  Correction[]
 }
