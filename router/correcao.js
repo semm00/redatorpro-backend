@@ -140,6 +140,20 @@ router.get('/aluno/:essayId', authMiddleware, async (req, res) => {
       include: { annotations: true, corretor: { select: { id: true, name: true, fotoPerfil: true } } }
     });
 
+    const normCorrection = correction ? {
+      id: correction.id,
+      notas: correction.notas || null,
+      notaTotal: correction.notaTotal ?? null,
+      comentariosGerais: correction.comentariosGerais || '',
+      updatedAt: correction.updatedAt,
+      corretor: correction.corretor || essay.corretor || null,
+      // NOVO: normaliza rects (string -> objeto)
+      annotations: (correction.annotations || []).map(a => ({
+        ...a,
+        rects: (typeof a.rects === 'string' ? (() => { try { return JSON.parse(a.rects); } catch { return null; } })() : a.rects) ?? null
+      }))
+    } : null;
+
     return res.json({
       essay: {
         id: essay.id,
@@ -150,15 +164,7 @@ router.get('/aluno/:essayId', authMiddleware, async (req, res) => {
         imagemUrl: essay.urlImage,
         notaTotal: essay.notaTotal ?? correction?.notaTotal ?? null
       },
-      correction: correction ? {
-        id: correction.id,
-        notas: correction.notas || null,
-        notaTotal: correction.notaTotal ?? null,
-        comentariosGerais: correction.comentariosGerais || '',
-        updatedAt: correction.updatedAt,
-        corretor: correction.corretor || essay.corretor || null,
-        annotations: correction.annotations || []
-      } : null
+      correction: normCorrection
     });
   } catch (e) {
     console.error('[GET /correcao/aluno/:essayId]', e);
