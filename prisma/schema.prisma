@@ -35,6 +35,8 @@ model Corretor {
   certificado  String?
   aprovado     Boolean? @default(false)
   rating       Float?   @default(0.0) // <-- agora só aqui
+  ratingCount  Int      @default(0)    // novo: número de avaliações recebidas
+  ratingSum    Float    @default(0.0)  // novo: soma das notas recebidas
 }
 
 model Estudante {

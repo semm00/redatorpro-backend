@@ -197,4 +197,43 @@ router.patch('/:id/visualizada', authMiddleware, async (req, res) => {
 	}
 });
 
+// NOVO: POST /red-corretores/:id/avaliar - avalia corretor (id = userId do corretor)
+router.post('/:id/avaliar', authMiddleware, async (req, res) => {
+	try {
+		const corretorUserId = parseInt(req.params.id, 10);
+		const r = Number(req.body.rating ?? req.body.ratingValue ?? null);
+		if (!corretorUserId || !Number.isFinite(r) || r < 1 || r > 5) {
+			return res.status(400).json({ error: 'Rating inválido. Deve ser entre 1 e 5.' });
+		}
+
+		// encontra registro de corretor por userId
+		const corretor = await prisma.corretor.findUnique({ where: { userId: corretorUserId } });
+		if (!corretor) return res.status(404).json({ error: 'Corretor não encontrado.' });
+
+		// atualiza soma e contagem e recalcula média dentro de transação
+		const novoCount = (corretor.ratingCount || 0) + 1;
+		const novoSum = (corretor.ratingSum || 0) + r;
+		const novoAvg = novoSum / novoCount;
+
+		const updated = await prisma.corretor.update({
+			where: { userId: corretorUserId },
+			data: {
+				ratingCount: novoCount,
+				ratingSum: novoSum,
+				rating: novoAvg
+			}
+		});
+
+		return res.json({
+			userId: corretorUserId,
+			rating: updated.rating,
+			ratingCount: updated.ratingCount,
+			ratingSum: updated.ratingSum
+		});
+	} catch (err) {
+		console.error('[POST /red-corretores/:id/avaliar] Erro:', err);
+		return res.status(500).json({ error: 'Erro ao salvar avaliação.' });
+	}
+});
+
 export default router;
