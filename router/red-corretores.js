@@ -197,38 +197,86 @@ router.patch('/:id/visualizada', authMiddleware, async (req, res) => {
 	}
 });
 
-// NOVO: POST /red-corretores/:id/avaliar - avalia corretor (id = userId do corretor)
+// NOVO: GET /red-corretores/:id/avaliacao - retorna a avaliação do usuário logado para essa REDAÇÃO (essayId)
+router.get('/:id/avaliacao', authMiddleware, async (req, res) => {
+	try {
+		const essayId = parseInt(req.params.id, 10);
+		const autorUserId = req.user?.id;
+		if (!essayId || !autorUserId) return res.status(400).json({ error: 'Parâmetros inválidos.' });
+
+		// garante que a redação existe
+		const essay = await prisma.essay.findUnique({ where: { id: essayId } });
+		if (!essay) return res.status(404).json({ error: 'Redação não encontrada.' });
+
+		const rating = await prisma.rating.findUnique({
+			where: { essayId_autorUserId: { essayId, autorUserId } }
+		});
+		return res.json(rating ? { value: rating.value, createdAt: rating.createdAt } : null);
+	} catch (err) {
+		console.error('[GET /red-corretores/:id/avaliacao] Erro:', err);
+		return res.status(500).json({ error: 'Erro ao buscar avaliação.' });
+	}
+});
+
+// ALTERADO: POST /red-corretores/:id/avaliar - avalia a correção da redação (id = essayId)
+// só o autor da redação pode avaliar, e apenas uma vez (persistente)
 router.post('/:id/avaliar', authMiddleware, async (req, res) => {
 	try {
-		const corretorUserId = parseInt(req.params.id, 10);
+		const essayId = parseInt(req.params.id, 10);
+		const autorUserId = req.user?.id;
 		const r = Number(req.body.rating ?? req.body.ratingValue ?? null);
-		if (!corretorUserId || !Number.isFinite(r) || r < 1 || r > 5) {
-			return res.status(400).json({ error: 'Rating inválido. Deve ser entre 1 e 5.' });
+		if (!essayId || !autorUserId || !Number.isFinite(r) || r < 0.5 || r > 5) {
+			return res.status(400).json({ error: 'Rating inválido. Deve ser entre 0.5 e 5.' });
 		}
 
-		// encontra registro de corretor por userId
-		const corretor = await prisma.corretor.findUnique({ where: { userId: corretorUserId } });
-		if (!corretor) return res.status(404).json({ error: 'Corretor não encontrado.' });
+		// encontra redação e verifica autor
+		const essay = await prisma.essay.findUnique({ where: { id: essayId } });
+		if (!essay) return res.status(404).json({ error: 'Redação não encontrada.' });
+		if (essay.authorId !== autorUserId) return res.status(403).json({ error: 'Só o autor pode avaliar esta correção.' });
 
-		// atualiza soma e contagem e recalcula média dentro de transação
-		const novoCount = (corretor.ratingCount || 0) + 1;
-		const novoSum = (corretor.ratingSum || 0) + r;
-		const novoAvg = novoSum / novoCount;
+		// verifica se já existe correção para esta redação (opcional)
+		const existingCorrection = await prisma.correction.findFirst({ where: { essayId } });
+		if (!existingCorrection) return res.status(400).json({ error: 'Correção ainda não disponível para avaliação.' });
 
-		const updated = await prisma.corretor.update({
-			where: { userId: corretorUserId },
-			data: {
-				ratingCount: novoCount,
-				ratingSum: novoSum,
-				rating: novoAvg
+		// verifica se autor já avaliou esta redação
+		const existingRating = await prisma.rating.findUnique({
+			where: { essayId_autorUserId: { essayId, autorUserId } }
+		});
+		if (existingRating) {
+			return res.status(200).json({ message: 'Você já avaliou esta correção.', value: existingRating.value, createdAt: existingRating.createdAt });
+		}
+
+		// cria nova avaliação e atualiza counters do corretor associado à correção (se houver)
+		const result = await prisma.$transaction(async (tx) => {
+			const created = await tx.rating.create({
+				data: { essayId, autorUserId, value: r }
+			});
+
+			// atualiza estatísticas do corretor que fez a correção (se disponível)
+			const corretorUserId = existingCorrection.corretorId || essay.corretorId || null;
+			let updatedCorretor = null;
+			if (corretorUserId) {
+				const corretor = await tx.corretor.findUnique({ where: { userId: corretorUserId } });
+				if (corretor) {
+					const novoCount = (corretor.ratingCount || 0) + 1;
+					const novoSum = (corretor.ratingSum || 0) + r;
+					const novoAvg = novoSum / novoCount;
+					updatedCorretor = await tx.corretor.update({
+						where: { userId: corretorUserId },
+						data: { ratingCount: novoCount, ratingSum: novoSum, rating: novoAvg }
+					});
+				}
 			}
+
+			return { created, updatedCorretor };
 		});
 
 		return res.json({
-			userId: corretorUserId,
-			rating: updated.rating,
-			ratingCount: updated.ratingCount,
-			ratingSum: updated.ratingSum
+			essayId,
+			yourRating: result.created.value,
+			rating: result.updatedCorretor ? result.updatedCorretor.rating : null,
+			ratingCount: result.updatedCorretor ? result.updatedCorretor.ratingCount : null,
+			ratingSum: result.updatedCorretor ? result.updatedCorretor.ratingSum : null
 		});
 	} catch (err) {
 		console.error('[POST /red-corretores/:id/avaliar] Erro:', err);

@@ -24,6 +24,7 @@ model User {
   estudante          Estudante?
   @@map("users") // <-- Adicione esta linha
   Correction Correction[]
+  Rating Rating[]
 }
 
 model Corretor {
@@ -67,6 +68,7 @@ model Essay {
   correcaoVisualizadaEm DateTime?
   // NOVO: relação com correções
   corrections  Correction[]
+  Rating Rating[]
 }
 
 model Correction {
@@ -118,4 +120,17 @@ model TextoMotivador {
   fonte     String?
   temaId    Int
   tema      Tema   @relation(fields: [temaId], references: [id])
+}
+
+// Novo: avalições individuais (avaliação da correção da redação por seu autor)
+model Rating {
+  id           Int      @id @default(autoincrement())
+  essayId      Int
+  essay        Essay    @relation(fields: [essayId], references: [id])
+  autorUserId  Int
+  autor        User     @relation(fields: [autorUserId], references: [id])
+  value        Float
+  createdAt    DateTime @default(now())
+
+  @@unique([essayId, autorUserId])
 }
