@@ -60,6 +60,41 @@ async function enviarEmailVerificacao(email, token) {
   });
 }
 
+async function enviarEmailRecuperacao(email, token) {
+  const url = `${process.env.FRONTEND_URL || 'https://ifpi-picos.github.io/projeto-integrador-redatorpro'}/resetar-senha.html?token=${token}`;
+  const logoUrl = "https://ifpi-picos.github.io/projeto-integrador-redatorpro/imagens/logo%20nome.png";
+  await transporter.sendMail({
+    from: `"RedatorPRO" <${process.env.GMAIL_USER}>`,
+    to: email,
+    subject: "Recuperação de Senha - RedatorPRO",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:24px;background:#f9f9f9;border-radius:8px;">
+        <div style="text-align:center;">
+          <img src="${logoUrl}" alt="RedatorPRO" style="max-width:220px;margin-bottom:24px;">
+        </div>
+        <h2 style="color:#1a237e;text-align:center;">Recuperação de Senha</h2>
+        <p style="font-size:1.1em;color:#333;text-align:center;">
+          Recebemos uma solicitação para redefinir sua senha.<br>
+          Clique no botão abaixo para criar uma nova senha:
+        </p>
+        <div style="text-align:center;margin:32px 0;">
+          <a href="${url}" style="background:#1a237e;color:#fff;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:1.1em;display:inline-block;">
+            Redefinir Senha
+          </a>
+        </div>
+        <p style="color:#555;text-align:center;">
+          Se não foi você, ignore este e-mail.<br>
+          <a href="${url}" style="color:#1a237e;">${url}</a>
+        </p>
+        <hr style="margin:32px 0;">
+        <p style="font-size:0.95em;color:#888;text-align:center;">
+          © RedatorPRO
+        </p>
+      </div>
+    `
+  });
+}
+
 userRouter.post('/', upload.single('certificado'), async (req, res) => {
   const { name, email, password, tipo, experiencia, escolaridade } = req.body;
   let certificadoUrl = null;
@@ -274,6 +309,27 @@ userRouter.post('/reenviar-verificacao', async (req, res) => {
   }
 });
 
+userRouter.post('/recuperar-senha', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "E-mail não fornecido." });
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado." });
+
+    // Gera token de recuperação de senha (expira em 1h)
+    const resetToken = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    await enviarEmailRecuperacao(user.email, resetToken);
+    res.json({ message: "E-mail de recuperação enviado. Verifique sua caixa de entrada." });
+  } catch (err) {
+    console.error("Erro ao enviar e-mail de recuperação:", err);
+    res.status(500).json({ error: "Erro ao enviar e-mail de recuperação." });
+  }
+});
+
 userRouter.get('/corretores-aprovados', async (req, res) => {
   try {
     // Busca usuários do tipo corretor que estão aprovados, incluindo dados do corretor
@@ -303,6 +359,31 @@ userRouter.get('/corretores-aprovados', async (req, res) => {
   } catch (err) {
     console.error('[GET /corretores-aprovados] Erro:', err);
     res.status(500).json({ error: 'Erro ao buscar corretores aprovados.', corretores: [] });
+  }
+});
+
+userRouter.post('/resetar-senha', async (req, res) => {
+  const { token, novaSenha } = req.body;
+  if (!token || !novaSenha) {
+    return res.status(400).json({ error: "Token e nova senha são obrigatórios." });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+    const hashedPassword = await bcrypt.hash(novaSenha, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword }
+    });
+    res.json({ message: "Senha redefinida com sucesso!" });
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(400).json({ error: "Token expirado. Solicite uma nova recuperação de senha." });
+    }
+    return res.status(400).json({ error: "Token inválido ou erro ao redefinir senha." });
   }
 });
 
