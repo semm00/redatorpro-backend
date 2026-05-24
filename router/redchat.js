@@ -228,44 +228,50 @@ ${texto}
     prompt = `
     Texto para correção (Tema: ${tema}):
     ${texto}
-Analise a redação abaixo conforme os critérios oficiais de CONCURSO, que avalia dissertações argumentativas em três eixos principais: Conteúdo (40 pontos), Estrutura (30 pontos) e Expressão (30 pontos). A nota total é de 100 pontos.
+Corrija a redação abaixo com base em critérios comuns a concursos públicos e provas de seleção que exigem dissertação argumentativa. Avalie conteúdo, estrutura e expressão com atenção à coerência, coesão, domínio da norma culta, desenvolvimento do tema e profundidade dos argumentos.
 
-Critérios de Correção Detalhados
-1. CONTEÚDO (40 pontos)
-Avalie:
-- Perspectiva crítica: O texto apresenta uma abordagem original e bem fundamentada sobre o tema?
-- Análise e senso crítico: Há argumentação lógica, com reflexão profunda (não apenas senso comum)?
-- Consistência e coerência: Os argumentos são bem encadeados e sustentados com exemplos, dados ou referências?
-Penalizações:
-- Abordagem tangencial, superficial ou cópia de textos da prova.
+Critérios de Correção Genéricos para Concursos:
+1. CONTEÚDO
+Avalie se o texto apresenta tese clara, argumentação sólida e abordagem aprofundada do tema.
+2. ESTRUTURA
+Verifique organização em introdução, desenvolvimento e conclusão, além da progressão temática e uso de conectivos.
+3. EXPRESSÃO
+Analise gramática, pontuação, escolha lexical e formalidade adequada ao gênero dissertativo.
 
-2. ESTRUTURA (30 pontos)
-Avalie:
-- Gênero textual: É uma dissertação argumentativa (não narrativa ou descritiva)?
-- Progressão textual: Os parágrafos seguem uma sequência lógica (introdução → desenvolvimento → conclusão)?
-- Coesão: Uso adequado de conectivos e articulação entre frases/parágrafos.
+Solicitações:
+- Atribua notas por eixo e explique os principais pontos fortes e fracos.
+- Destaque 2 pontos fortes e 2 pontos de melhoria.
+- Sugira recomendações práticas para o autor aprimorar o texto.
 
-3. EXPRESSÃO (30 pontos)
-Avalie:
-- Norma culta: Domínio da gramática (concordância, regência, pontuação, acentuação, etc.).
-- Clareza e precisão: Vocabulário adequado e evitou repetições ou ambiguidades?
-- Nível de linguagem: Formalidade compatível com o gênero dissertativo.
-
-Solicitações Específicas:
-Atribua notas parciais (0 a 40 para Conteúdo; 0 a 30 para Estrutura e Expressão).
-Nota final: Soma das três partes (0 a 100).
 IMPORTANTE: Ao final da resposta, escreva a nota total no formato: "Nota Final: [valor numérico]".
-
-Destaque:
-- 2 pontos fortes (ex.: argumentação sólida, coesão eficiente).
-- 2 pontos fracos (ex.: generalizações, erros de regência).
-
-Sugestões de melhoria: Recomendações específicas (ex.: aprofundar um argumento, revisar concordância).
 
 Texto para correção:
 ${texto}
 `;
   } else if (tipo === "fuvest" || tipo === "vestibular") {
+    prompt = `
+    Texto para correção (Tema: ${tema}):
+    ${texto}
+Corrija a redação abaixo com base em critérios gerais de provas de vestibular que exigem dissertação argumentativa. Avalie desenvolvimento do tema, coerência dos argumentos, coesão textual e correção gramatical, usando linguagem clara e didática.
+
+Critérios de Correção Genéricos para Vestibulares:
+1. DESENVOLVIMENTO DO TEMA
+Verifique se o texto atende ao tema, desenvolve ideias relevantes e apresenta repertório pertinente.
+2. COERÊNCIA E ARTICULAÇÃO
+Avalie se os argumentos são organizados logicamente e se as frases e parágrafos estão bem conectados.
+3. CORREÇÃO E VOCABULÁRIO
+Analise norma culta, pontuação, ortografia e vocabulário adequado ao gênero dissertativo.
+
+Solicitações:
+- Atribua notas por critério e explique os principais pontos fortes e fracos.
+- Indique 2 aspectos positivos e 2 sugestões de melhoria.
+- Ofereça recomendações práticas para o candidato evoluir.
+
+IMPORTANTE: Ao final da resposta, escreva a nota total no formato: "Nota Final: [valor numérico]".
+
+Texto para correção:
+${texto}
+`;
     prompt = `
     Texto para correção (Tema: ${tema}):
     ${texto}

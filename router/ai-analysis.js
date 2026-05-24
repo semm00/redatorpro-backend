@@ -54,10 +54,10 @@ Receba os seguintes dados (em JSON):
 - selectedType: tipo de redação filtrado (all, enem, vestibular, concursos)
 
 Sua tarefa:
-1) Combine os números com a análise de competências para gerar um diagnóstico curto (2-3 frases).
-2) Gere uma lista de 5 dicas acionáveis e detalhadas em linguagem natural, explicando o que o usuário deve praticar concretamente (ex.: exercícios, tempo de estudo, atividades por competência).
+1) Combine os números com a análise de competências para gerar um diagnóstico curto (2-3 frases), adaptado ao tipo de redação selecionado.
+2) Gere uma lista de 5 dicas acionáveis e detalhadas em linguagem natural, explicando o que o usuário deve praticar concretamente (ex.: exercícios, tempo de estudo, atividades por competência) para ENEM, Vestibular ou Concurso.
 3) Para cada competência (use o campo "competencies"), ofereça 1 sugestão específica e um exemplo de exercício prático.
-4) Proponha um mini-plano semanal (3 itens) para melhorar as competências mais fracas.
+4) Proponha um mini-plano semanal (3 itens) para melhorar as competências mais fracas do tipo de redação escolhido.
 5) Retorne a saída no formato JSON estrito com as chaves: summary (string), tips (array de {title, text}), perCompetency (objeto por label -> { suggestion, exercise }), weeklyPlan (array de strings), and metadata { generatedAt }.
 
 IMPORTANTE: Responda somente com o JSON válido (sem comentários, sem explicações extras). Use português correto.
