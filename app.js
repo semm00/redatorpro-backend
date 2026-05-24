@@ -7,6 +7,7 @@ import serverRouter from "./router/server.js";
 import pdfRoutes from "./router/pdf.js";
 import redchatRouter from "./router/redchat.js";
 import geminiRouter from "./router/gemini.js";
+import aiAnalysisRouter from "./router/ai-analysis.js";
 import redacoesRouter from "./router/redacoes.js";
 import relatorioRouter from "./router/relatorio.js";
 import perfilRouter from "./router/perfil.js";
@@ -27,7 +28,7 @@ app.use(
   cors({
     origin: "https://ifpi-picos.github.io",
     credentials: true,
-  })
+  }),
 );
 
 // Middleware extra para garantir CORS em todas as respostas
@@ -36,11 +37,11 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Credentials", "true");
   res.header(
     "Access-Control-Allow-Methods",
-    "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS",
   );
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
   );
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
@@ -66,6 +67,7 @@ app.use("/server", authMiddleware, serverRouter);
 app.use("/pdf", pdfRoutes);
 app.use("/redchat", authMiddleware, redchatRouter);
 app.use("/gemini", geminiRouter);
+app.use("/ai-analysis", authMiddleware, aiAnalysisRouter);
 app.use("/redacoes", authMiddleware, redacoesRouter);
 app.use("/relatorio", relatorioRouter);
 app.use("/perfil", authMiddleware, perfilRouter);
