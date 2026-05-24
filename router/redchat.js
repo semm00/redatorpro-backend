@@ -1,9 +1,9 @@
-import express from 'express';
-import { PrismaClient } from '@prisma/client';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import multer from 'multer';
-import { createClient } from '@supabase/supabase-js';
-import axios from 'axios'; // Adicione esta linha no topo
+import express from "express";
+import { PrismaClient } from "@prisma/client";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import multer from "multer";
+import { createClient } from "@supabase/supabase-js";
+import axios from "axios"; // Adicione esta linha no topo
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -17,25 +17,29 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Configuração do multer para upload de imagem
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/', upload.single('imagem'), async (req, res) => {
+router.post("/", upload.single("imagem"), async (req, res) => {
   const { tipoCorrecao, tema, texto } = req.body;
   const file = req.file;
 
   if (!req.user) {
-    return res.status(401).json({ error: 'Usuário não autenticado.' });
+    return res.status(401).json({ error: "Usuário não autenticado." });
   }
 
   // Impede envio de texto e imagem juntos
   if ((file && texto && texto.trim()) || (!file && (!texto || !texto.trim()))) {
-    return res.status(400).json({ error: 'Envie apenas o texto digitado OU apenas a imagem da redação.' });
+    return res
+      .status(400)
+      .json({
+        error: "Envie apenas o texto digitado OU apenas a imagem da redação.",
+      });
   }
 
   // Padroniza o tipo de correção para minúsculo
-  const tipo = tipoCorrecao ? tipoCorrecao.toLowerCase() : '';
+  const tipo = tipoCorrecao ? tipoCorrecao.toLowerCase() : "";
 
   // Prompt personalizado conforme o tipo de correção (igual ao gemini.js)
-  let prompt = '';
-  if (tipo === 'enem') {
+  let prompt = "";
+  if (tipo === "enem") {
     prompt = `
 Texto para correção (Tema: ${tema}):
     ${texto}
@@ -222,7 +226,7 @@ IMPORTANTE: Ao final da resposta, escreva a nota total (soma das competências) 
 Texto para correção:
 ${texto}
 `;
-  } else if (tipo === 'concursos') {
+  } else if (tipo === "concursos") {
     prompt = `
     Texto para correção (Tema: ${tema}):
     ${texto}
@@ -263,7 +267,7 @@ Sugestões de melhoria: Recomendações específicas (ex.: aprofundar um argumen
 Texto para correção:
 ${texto}
 `;
-  } else if (tipo === 'fuvest') {
+  } else if (tipo === "fuvest") {
     prompt = `
     Texto para correção (Tema: ${tema}):
     ${texto}
@@ -355,26 +359,32 @@ ${texto}
   if (file) {
     try {
       // Sanitiza o nome do arquivo para evitar caracteres inválidos no Supabase
-      const originalName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+      const originalName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, "_");
       const filePath = `${Date.now()}_${originalName}`;
       const { error } = await supabase.storage
         .from("redator")
         .upload(filePath, file.buffer, { contentType: file.mimetype });
       if (error) throw error;
-      urlImage = supabase.storage.from("redator").getPublicUrl(filePath).data.publicUrl;
+      urlImage = supabase.storage.from("redator").getPublicUrl(filePath)
+        .data.publicUrl;
 
       // Baixa a imagem do Supabase para obter o buffer
-      const response = await axios.get(urlImage, { responseType: 'arraybuffer' });
-      const buffer = Buffer.from(response.data, 'binary');
-      const base64 = buffer.toString('base64');
+      const response = await axios.get(urlImage, {
+        responseType: "arraybuffer",
+      });
+      const buffer = Buffer.from(response.data, "binary");
+      const base64 = buffer.toString("base64");
       geminiImagePart = {
         inlineData: {
           data: base64,
-          mimeType: file.mimetype
-        }
+          mimeType: file.mimetype,
+        },
       };
     } catch (err) {
-      console.error("Erro ao enviar imagem para o Supabase ou preparar imagem para Gemini:", err.message);
+      console.error(
+        "Erro ao enviar imagem para o Supabase ou preparar imagem para Gemini:",
+        err.message,
+      );
       return res.status(500).json({ error: "Erro ao enviar imagem." });
     }
   }
@@ -384,22 +394,19 @@ ${texto}
     let geminiInput;
     if (geminiImagePart) {
       // Entrada multimodal: prompt + imagem (base64)
-      geminiInput = [
-        { text: prompt },
-        geminiImagePart
-      ];
+      geminiInput = [{ text: prompt }, geminiImagePart];
     } else {
       geminiInput = prompt;
     }
 
-    // Usa o modelo Gemini 2.0 Flash
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    // Usa o modelo Gemini 3.5 Flash
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
     const result = await model.generateContent(geminiInput);
     const response = await result.response;
     const correcao = response.text();
 
     // LOG para depuração
-    console.log('Texto da correção:', correcao);
+    console.log("Texto da correção:", correcao);
 
     // Regex robusto para pegar a nota final exatamente no formato "Nota Final: [valor numérico]"
     let nota = null;
@@ -408,19 +415,23 @@ ${texto}
       nota = Number(notaMatch[1]);
     } else {
       // Tenta variantes como "Nota total", "Nota da Redação", etc
-      notaMatch = correcao.match(/nota\s*(final|total|da reda[cç][aã]o)[^0-9\-]{0,10}(-?\d+)/i);
+      notaMatch = correcao.match(
+        /nota\s*(final|total|da reda[cç][aã]o)[^0-9\-]{0,10}(-?\d+)/i,
+      );
       if (notaMatch) {
         nota = Number(notaMatch[2]);
       }
     }
     // Se ainda não encontrou, tenta pegar a última nota de 1-4 dígitos no texto
     if (nota === null) {
-      const allNotas = [...correcao.matchAll(/(-?\d{1,4})/g)].map(m => Number(m[1]));
+      const allNotas = [...correcao.matchAll(/(-?\d{1,4})/g)].map((m) =>
+        Number(m[1]),
+      );
       if (allNotas.length > 0) {
         nota = allNotas[allNotas.length - 1];
       }
     }
-    console.log('Nota extraída:', nota);
+    console.log("Nota extraída:", nota);
 
     const essay = await prisma.essay.create({
       data: {
@@ -431,14 +442,14 @@ ${texto}
         correcaoIa: correcao,
         tipoCorrecao,
         tema,
-        notaTotal: nota
-      }
+        notaTotal: nota,
+      },
     });
     // Inclui o texto original e a url da imagem na resposta
     res.json({ correcao, nota, essay, texto, urlImage });
   } catch (err) {
     console.error("Erro ao processar a redação:", err); // <-- log detalhado
-    res.status(500).json({ error: 'Erro ao processar a redação.' });
+    res.status(500).json({ error: "Erro ao processar a redação." });
   }
 });
 

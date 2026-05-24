@@ -1,19 +1,21 @@
-import express from 'express';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import express from "express";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const router = express.Router();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   const { texto, tipoCorrecao } = req.body;
 
   if (!texto || !tipoCorrecao) {
-    return res.status(400).json({ erro: 'Texto e tipo de correção são obrigatórios.' });
+    return res
+      .status(400)
+      .json({ erro: "Texto e tipo de correção são obrigatórios." });
   }
 
   // Prompt personalizado conforme o tipo de correção
-  let prompt = '';
-  if (tipoCorrecao === 'enem') {
+  let prompt = "";
+  if (tipoCorrecao === "enem") {
     prompt = `
 Texto para correção (Tema: ${tema}):
     ${texto}
@@ -55,7 +57,7 @@ Ofereça recomendações específicas para elevar a nota em cada competência.
 Texto para correção:
 ${texto}
 `;
-  } else if (tipoCorrecao === 'concursos') {
+  } else if (tipoCorrecao === "concursos") {
     prompt = `
 Analise a redação abaixo conforme os critérios oficiais da FCC, que avalia dissertações argumentativas em três eixos principais: Conteúdo (40 pontos), Estrutura (30 pontos) e Expressão (30 pontos). A nota total é de 100 pontos.
 
@@ -94,7 +96,7 @@ Sugestões de melhoria: Recomendações específicas (ex.: aprofundar um argumen
 Texto para correção:
 ${texto}
 `;
-  } else if (tipoCorrecao === 'fuvest') {
+  } else if (tipoCorrecao === "fuvest") {
     prompt = `
 Avalie a redação abaixo conforme os critérios oficiais da FUVEST, atribuindo nota de 10 a 50 pontos. Siga esta estrutura:
 
@@ -140,8 +142,8 @@ ${texto}
   }
 
   try {
-    // Usa o modelo Gemini 2.0 Flash
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    // Usa o modelo Gemini 3.5 Flash
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const correcao = response.text();
@@ -149,7 +151,7 @@ ${texto}
     res.json({ correcao });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erro: 'Erro ao consultar a Gemini' });
+    res.status(500).json({ erro: "Erro ao consultar a Gemini" });
   }
 });
 
