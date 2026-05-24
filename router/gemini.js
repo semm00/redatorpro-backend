@@ -5,7 +5,7 @@ const router = express.Router();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.post("/", async (req, res) => {
-  const { texto, tipoCorrecao } = req.body;
+  const { texto, tipoCorrecao, tema } = req.body;
 
   if (!texto || !tipoCorrecao) {
     return res
@@ -59,7 +59,7 @@ ${texto}
 `;
   } else if (tipoCorrecao === "concursos") {
     prompt = `
-Analise a redação abaixo conforme os critérios oficiais da FCC, que avalia dissertações argumentativas em três eixos principais: Conteúdo (40 pontos), Estrutura (30 pontos) e Expressão (30 pontos). A nota total é de 100 pontos.
+Analise a redação abaixo conforme os critérios oficiais de CONCURSO, que avalia dissertações argumentativas em três eixos principais: Conteúdo (40 pontos), Estrutura (30 pontos) e Expressão (30 pontos). A nota total é de 100 pontos.
 
 Critérios de Correção Detalhados
 1. CONTEÚDO (40 pontos)
@@ -96,9 +96,9 @@ Sugestões de melhoria: Recomendações específicas (ex.: aprofundar um argumen
 Texto para correção:
 ${texto}
 `;
-  } else if (tipoCorrecao === "fuvest") {
+  } else if (tipoCorrecao === "fuvest" || tipoCorrecao === "vestibular") {
     prompt = `
-Avalie a redação abaixo conforme os critérios oficiais da FUVEST, atribuindo nota de 10 a 50 pontos. Siga esta estrutura:
+Avalie a redação abaixo conforme os critérios oficiais de VESTIBULAR, atribuindo nota de 10 a 50 pontos. Siga esta estrutura:
 
 Critérios de Avaliação:
 

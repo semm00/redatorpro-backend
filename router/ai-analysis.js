@@ -24,19 +24,34 @@ function tryParseJSON(text) {
 }
 
 router.post("/", async (req, res) => {
-  const { overview, competencies, distribution, recent } = req.body || {};
+  const { overview, competencies, distribution, recent, selectedType } =
+    req.body || {};
 
   if (!overview) {
     return res.status(400).json({ erro: "overview é obrigatório" });
   }
 
+  const typeLabel =
+    selectedType === "enem"
+      ? "ENEM"
+      : selectedType === "vestibular"
+        ? "Vestibular"
+        : selectedType === "concursos"
+          ? "Concurso"
+          : "todos os tipos";
+
   const prompt = `Você é um assistente de ensino que combina resultados numéricos (médias e notas) com análise textual da redação para gerar um painel de "Análise da IA" em português.
+
+A análise deve ser direcionada ao tipo de redação selecionado: ${typeLabel}.
+
+Receba os seguintes dados (em JSON):
 
 Receba os seguintes dados (em JSON):
 - overview: objeto com mediaGeral, totalRedacoes, ultimaNota, iaCount, corretorCount
 - competencies: lista de objetos { label, average }
 - distribution: objeto com contagens por fonte
 - recent: lista simplificada de redações recentes (tema, nota, fonte)
+- selectedType: tipo de redação filtrado (all, enem, vestibular, concursos)
 
 Sua tarefa:
 1) Combine os números com a análise de competências para gerar um diagnóstico curto (2-3 frases).

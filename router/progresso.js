@@ -60,23 +60,36 @@ router.get("/", async (req, res) => {
       return res.status(401).json({ error: "Usuário não autenticado." });
     }
 
+    const tipo = (req.query.tipo || "all").toString().toLowerCase();
+    const typeMap = {
+      enem: ["enem"],
+      vestibular: ["fuvest", "vestibular", "vest"],
+      concursos: ["concursos", "fcc", "ita"],
+    };
+    const allowedTypes = typeMap[tipo] || null;
+
     const [iaEssays, humanCorrections] = await Promise.all([
       prisma.essay.findMany({
         where: {
           authorId: userId,
           corrigidaPor: "ia",
           notaTotal: { not: null },
+          ...(allowedTypes ? { tipoCorrecao: { in: allowedTypes } } : {}),
         },
         select: {
           id: true,
           tema: true,
           notaTotal: true,
+          tipoCorrecao: true,
           createdAt: true,
         },
       }),
       prisma.correction.findMany({
         where: {
-          essay: { authorId: userId },
+          essay: {
+            authorId: userId,
+            ...(allowedTypes ? { tipoCorrecao: { in: allowedTypes } } : {}),
+          },
           notaTotal: { not: null },
         },
         select: {
@@ -184,12 +197,14 @@ router.get("/", async (req, res) => {
     const totalIa = iaEssays.length;
     const totalHumano = humanCorrections.length;
 
+    const selectedType = tipo;
+
     const now = new Date();
     now.setUTCDate(1);
     const monthsWindow = [];
     for (let i = 5; i >= 0; i -= 1) {
       const ref = new Date(
-        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1)
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1),
       );
       const key = monthKey(ref);
       monthsWindow.push({ key, label: monthLabelFromKey(key) });
@@ -251,6 +266,7 @@ router.get("/", async (req, res) => {
         ia: totalIa,
         corretor: totalHumano,
       },
+      selectedType,
       monthlyScores,
       competencies,
       recent,

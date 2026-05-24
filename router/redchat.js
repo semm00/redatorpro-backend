@@ -27,11 +27,9 @@ router.post("/", upload.single("imagem"), async (req, res) => {
 
   // Impede envio de texto e imagem juntos
   if ((file && texto && texto.trim()) || (!file && (!texto || !texto.trim()))) {
-    return res
-      .status(400)
-      .json({
-        error: "Envie apenas o texto digitado OU apenas a imagem da redação.",
-      });
+    return res.status(400).json({
+      error: "Envie apenas o texto digitado OU apenas a imagem da redação.",
+    });
   }
 
   // Padroniza o tipo de correção para minúsculo
@@ -230,7 +228,7 @@ ${texto}
     prompt = `
     Texto para correção (Tema: ${tema}):
     ${texto}
-Analise a redação abaixo conforme os critérios oficiais da FCC, que avalia dissertações argumentativas em três eixos principais: Conteúdo (40 pontos), Estrutura (30 pontos) e Expressão (30 pontos). A nota total é de 100 pontos.
+Analise a redação abaixo conforme os critérios oficiais de CONCURSO, que avalia dissertações argumentativas em três eixos principais: Conteúdo (40 pontos), Estrutura (30 pontos) e Expressão (30 pontos). A nota total é de 100 pontos.
 
 Critérios de Correção Detalhados
 1. CONTEÚDO (40 pontos)
@@ -267,15 +265,15 @@ Sugestões de melhoria: Recomendações específicas (ex.: aprofundar um argumen
 Texto para correção:
 ${texto}
 `;
-  } else if (tipo === "fuvest") {
+  } else if (tipo === "fuvest" || tipo === "vestibular") {
     prompt = `
     Texto para correção (Tema: ${tema}):
     ${texto}
-Você é uma inteligência artificial treinada para corrigir redações dissertativo-argumentativas no modelo da FUVEST. Corrija a redação abaixo com base nos critérios oficiais definidos no Guia FUVEST 2025.
+Você é uma inteligência artificial treinada para corrigir redações dissertativo-argumentativas no modelo de VESTIBULAR. Corrija a redação abaixo com base nos critérios oficiais definidos no Guia de Vestibular 2025.
 
 A redação deve ser uma dissertação de caráter argumentativo, escrita em língua portuguesa padrão, com letra legível. Corrija com imparcialidade, clareza e didatismo, apresentando sua análise conforme os 3 critérios de correção, pontuando de 1 a 5 em cada critério, e gerando uma nota final de 10 a 50, após ponderação.
 
-🧾 CRITÉRIOS DE CORREÇÃO (FUVEST)
+🧾 CRITÉRIOS DE CORREÇÃO (VESTIBULAR)
 Para cada critério, siga esta estrutura:
 
 ✍️ 1. Desenvolvimento do Tema e Organização do Texto
