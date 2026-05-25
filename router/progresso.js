@@ -82,6 +82,8 @@ router.get("/", async (req, res) => {
           notaTotal: true,
           tipoCorrecao: true,
           createdAt: true,
+          text: true,
+          correcaoIa: true,
         },
       }),
       prisma.correction.findMany({
@@ -96,14 +98,27 @@ router.get("/", async (req, res) => {
           id: true,
           notaTotal: true,
           notas: true,
+          comentariosGerais: true,
           updatedAt: true,
           createdAt: true,
+          annotations: {
+            select: {
+              tipo: true,
+              rangeStart: true,
+              rangeEnd: true,
+              snippet: true,
+              comment: true,
+              createdAt: true,
+            },
+          },
           essay: {
             select: {
               id: true,
               tema: true,
               tipoCorrecao: true,
               createdAt: true,
+              text: true,
+              correcaoIa: true,
             },
           },
         },
@@ -141,6 +156,8 @@ router.get("/", async (req, res) => {
         nota: score,
         tema: essay.tema || "Redação",
         data: essay.createdAt,
+        texto: essay.text || null,
+        correcaoIa: essay.correcaoIa || null,
       });
       registerMonthly(essay.createdAt, "ia", score);
     });
@@ -158,6 +175,11 @@ router.get("/", async (req, res) => {
         nota: score,
         tema: correction.essay?.tema || "Redação",
         data: dataRef,
+        notas: correction.notas || null,
+        comentariosGerais: correction.comentariosGerais || null,
+        annotations: correction.annotations || null,
+        texto: correction.essay?.text || null,
+        correcaoIa: correction.essay?.correcaoIa || null,
       });
       registerMonthly(dataRef, "humano", score);
 
@@ -249,6 +271,12 @@ router.get("/", async (req, res) => {
         nota: item.nota,
         tema: item.tema,
         data: item.data,
+        // campos adicionais para análise pela IA
+        texto: item.texto || null,
+        correcaoIa: item.correcaoIa || null,
+        notas: item.notas || null,
+        comentariosGerais: item.comentariosGerais || null,
+        annotations: item.annotations || null,
       }));
 
     return res.json({

@@ -40,34 +40,33 @@ router.post("/", async (req, res) => {
           ? "Concurso"
           : "todos os tipos";
 
-  const prompt = `Você é um assistente de ensino que combina resultados numéricos (médias e notas) com análise textual da redação para gerar um painel de "Análise da IA" em português.
+  const prompt = `Você é um assistente pedagógico que combina resultados numéricos (médias e notas) com análise textual e de anotações das redações para gerar um painel de "Análise da IA" em português.
 
-A análise deve ser direcionada ao tipo de redação selecionado: ${typeLabel}.
+  A análise deve ser direcionada ao tipo de redação selecionado: ${typeLabel}.
 
-Receba os seguintes dados (em JSON):
+  Receba os seguintes dados (em JSON):
+  - overview: objeto com mediaGeral, totalRedacoes, ultimaNota, iaCount, corretorCount
+  - competencies: lista de objetos { label, average }
+  - distribution: objeto com contagens por fonte
+  - recent: lista das últimas redações, cada item pode conter: tema, nota, fonte, data, texto (texto da redação), correcaoIa (se disponível), notas (objeto por competência), comentariosGerais (texto do corretor) e annotations (trechos anotados)
+  - selectedType: tipo de redação filtrado (all, enem, vestibular, concursos)
 
-Receba os seguintes dados (em JSON):
-- overview: objeto com mediaGeral, totalRedacoes, ultimaNota, iaCount, corretorCount
-- competencies: lista de objetos { label, average }
-- distribution: objeto com contagens por fonte
-- recent: lista simplificada de redações recentes (tema, nota, fonte)
-- selectedType: tipo de redação filtrado (all, enem, vestibular, concursos)
+  Sua tarefa (obrigatória):
+  1) Combine os números com a análise textual das últimas correções para produzir um diagnóstico curto (2-3 frases) focado no tipo de redação selecionado.
+  2) Identifique padrões recorrentes de erro nas últimas correções (ex.: problemas de coesão, conectivos, pontuação, proposta de intervenção fraca), relate as 3 mais frequentes e dê exemplos retirados das redações (trechos exemplares) quando possível.
+  3) Gere uma lista de 5 dicas acionáveis e detalhadas em linguagem natural, explicando exercícios práticos por competência (ex.: exercícios de coesão, reescrita de parágrafos, tarefas de revisão pontual).
+  4) Para cada competência (use o campo "competencies"), ofereça 1 sugestão específica, um exercício prático e, se aplicável, um padrão de erro identificado nessa competência.
+  5) Proponha um mini-plano semanal (3 itens) para melhorar as competências mais fracas do tipo de redação escolhido.
+  6) Retorne a saída no formato JSON estrito com as chaves: summary (string), tips (array de {title, text}), perCompetency (objeto por label -> { suggestion, exercise, pattern? }), weeklyPlan (array de strings), errorPatterns (array de {pattern, examples}), and metadata { generatedAt }.
 
-Sua tarefa:
-1) Combine os números com a análise de competências para gerar um diagnóstico curto (2-3 frases), adaptado ao tipo de redação selecionado.
-2) Gere uma lista de 5 dicas acionáveis e detalhadas em linguagem natural, explicando o que o usuário deve praticar concretamente (ex.: exercícios, tempo de estudo, atividades por competência) para ENEM, Vestibular ou Concurso.
-3) Para cada competência (use o campo "competencies"), ofereça 1 sugestão específica e um exemplo de exercício prático.
-4) Proponha um mini-plano semanal (3 itens) para melhorar as competências mais fracas do tipo de redação escolhido.
-5) Retorne a saída no formato JSON estrito com as chaves: summary (string), tips (array de {title, text}), perCompetency (objeto por label -> { suggestion, exercise }), weeklyPlan (array de strings), and metadata { generatedAt }.
+  IMPORTANTE: Responda somente com o JSON válido (sem comentários, sem explicações extras). Use português correto.
 
-IMPORTANTE: Responda somente com o JSON válido (sem comentários, sem explicações extras). Use português correto.
-
-Dados de entrada (apenas para referência):
-overview: ${JSON.stringify(overview)}
-competencies: ${JSON.stringify(competencies)}
-distribution: ${JSON.stringify(distribution)}
-recent sample: ${JSON.stringify((recent || []).slice(0, 3))}
-`;
+  Dados de entrada (apenas para referência):
+  overview: ${JSON.stringify(overview)}
+  competencies: ${JSON.stringify(competencies)}
+  distribution: ${JSON.stringify(distribution)}
+  recent sample (até 3 últimas redações com texto e correções): ${JSON.stringify((recent || []).slice(0, 3))}
+  `;
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
