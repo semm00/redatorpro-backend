@@ -218,17 +218,33 @@
       </div>
     </form>
 
-    <h2>Excluir repertorio</h2>
+    <h2>Gerenciar Repertorios</h2>
     <div class="box">
       <input
         type="text"
         id="busca-repertorio"
         placeholder="Pesquisar por titulo"
       />
-      <select id="select-repertorio"></select>
-      <button class="danger" id="btn-excluir" type="button">
-        Excluir selecionado
-      </button>
+      <select id="select-repertorio">
+        <option value="">Selecione um repertorio...</option>
+      </select>
+      <div style="display: flex; gap: 8px; margin-top: 10px">
+        <button id="btn-editar" type="button" style="background: #2196f3">
+          Editar selecionado
+        </button>
+        <button class="danger" id="btn-excluir" type="button">
+          Excluir selecionado
+        </button>
+      </div>
+      <div
+        id="status-msg"
+        style="
+          margin-top: 10px;
+          color: #246493;
+          font-weight: 700;
+          min-height: 20px;
+        "
+      ></div>
     </div>
 
     <script>
@@ -236,6 +252,7 @@
       const form = document.getElementById("form-repertorio");
       const busca = document.getElementById("busca-repertorio");
       const select = document.getElementById("select-repertorio");
+      const statusMsg = document.getElementById("status-msg");
       let repertorios = [];
 
       function atualizarCampos() {
@@ -253,10 +270,14 @@
         const filtrados = repertorios.filter((item) =>
           item.title.toLowerCase().includes(termo),
         );
-        select.innerHTML = "";
+        select.innerHTML =
+          '<option value="">Selecione um repertorio...</option>';
         if (!filtrados.length) {
-          select.innerHTML =
-            '<option value="">Nenhum repertorio encontrado</option>';
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "Nenhum repertorio encontrado";
+          option.disabled = true;
+          select.appendChild(option);
           return;
         }
         filtrados.forEach((item) => {
@@ -268,10 +289,20 @@
       }
 
       async function carregarRepertorios() {
-        select.innerHTML = "<option>Carregando...</option>";
-        const response = await fetch("/repertorios");
-        repertorios = response.ok ? await response.json() : [];
-        atualizarSelect(busca.value);
+        try {
+          statusMsg.textContent = "Carregando repertorios...";
+          const response = await fetch("/repertorios");
+          if (!response.ok) throw new Error(`Erro ${response.status}`);
+          repertorios = await response.json();
+          console.log("Repertorios carregados:", repertorios);
+          statusMsg.textContent = `✓ ${repertorios.length} repertorios carregados`;
+          atualizarSelect(busca.value);
+        } catch (err) {
+          console.error("Erro ao carregar repertorios:", err);
+          statusMsg.textContent = "✗ Erro ao carregar repertorios";
+          statusMsg.style.color = "#c0392b";
+          repertorios = [];
+        }
       }
 
       category.addEventListener("change", atualizarCampos);
@@ -315,33 +346,48 @@
         .getElementById("btn-excluir")
         .addEventListener("click", async () => {
           const id = select.value;
-          if (!id) return alert("Selecione um repertorio.");
+          if (!id) return alert("Selecione um repertorio");
           const item = repertorios.find(
             (repertorio) => String(repertorio.id) === String(id),
           );
-          if (!confirm(`Excluir "${item?.title || "repertorio"}"?`)) return;
-          const response = await fetch(`/repertorios/${id}`, {
-            method: "DELETE",
-          });
-          if (response.ok) {
-            alert("Repertorio excluido.");
-            carregarRepertorios();
-          } else {
-            alert("Erro ao excluir repertorio.");
+          if (
+            !confirm(
+              `Excluir "${item?.title || "repertorio"}"? Esta ação não pode ser desfeita.`,
+            )
+          )
+            return;
+          try {
+            const response = await fetch(
+              `/repertorios/${encodeURIComponent(id)}`,
+              {
+                method: "DELETE",
+              },
+            );
+            if (response.ok) {
+              alert("Repertorio excluido com sucesso");
+              select.value = "";
+              form.reset();
+              statusMsg.textContent = "✓ Repertorio excluido";
+              atualizarCampos();
+              carregarRepertorios();
+            } else {
+              const err = await response.json().catch(() => ({}));
+              alert(err.error || "Erro ao excluir repertorio");
+            }
+          } catch (err) {
+            console.error("Erro:", err);
+            alert("Erro ao excluir repertorio: " + err.message);
           }
         });
 
       atualizarCampos();
       carregarRepertorios();
 
-      // preencher formulario ao selecionar
-      select.addEventListener("change", () => {
-        const id = select.value;
-        if (!id) return;
-        const item = repertorios.find((r) => String(r.id) === String(id));
+      // Função para preencher formulário
+      function preencherFormulario(item) {
         if (!item) return;
-        // popular campos
-        document.getElementById("repertorioId").value = item.id;
+        console.log("Preenchendo formulario com:", item);
+        document.getElementById("repertorioId").value = item.id || "";
         document.getElementById("category").value = item.category || "";
         atualizarCampos();
         document.getElementById("title").value = item.title || "";
@@ -367,6 +413,18 @@
         document.getElementById("sourceLinks").value = item.sourceLinks || "";
         document.getElementById("essayUse").value = item.essayUse || "";
         document.getElementById("btn-salvar").textContent = "Salvar alterações";
+        statusMsg.textContent = `✓ Editar: ${item.title}`;
+        statusMsg.style.color = "#246493";
+      }
+
+      // Botão editar
+      document.getElementById("btn-editar").addEventListener("click", () => {
+        const id = select.value;
+        if (!id) return alert("Selecione um repertorio primeiro");
+        const item = repertorios.find((r) => String(r.id) === String(id));
+        if (!item) return alert("Repertorio não encontrado");
+        preencherFormulario(item);
+        form.scrollIntoView({ behavior: "smooth" });
       });
 
       // botao novo/limpar
@@ -374,6 +432,8 @@
         form.reset();
         document.getElementById("repertorioId").value = "";
         document.getElementById("btn-salvar").textContent = "Salvar repertorio";
+        select.value = "";
+        statusMsg.textContent = "";
         atualizarCampos();
       });
     </script>
