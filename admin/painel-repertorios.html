@@ -206,9 +206,15 @@
       <label for="essayUse">Como poderia ser usado na redacao *</label>
       <textarea id="essayUse" name="essayUse" required></textarea>
 
-      <div style="display:flex; gap:8px; align-items:center;">
+      <div style="display: flex; gap: 8px; align-items: center">
         <button type="submit" id="btn-salvar">Salvar repertorio</button>
-        <button type="button" id="btn-novo" style="background:#f3f4f6;color:#1f2936;border:1px solid #e5e7eb;">Novo</button>
+        <button
+          type="button"
+          id="btn-novo"
+          style="background: #f3f4f6; color: #1f2936; border: 1px solid #e5e7eb"
+        >
+          Novo
+        </button>
       </div>
     </form>
 
@@ -288,10 +294,15 @@
           });
         }
         if (response.ok) {
-          alert(id ? "Repertorio atualizado com sucesso!" : "Repertorio salvo com sucesso!");
+          alert(
+            id
+              ? "Repertorio atualizado com sucesso!"
+              : "Repertorio salvo com sucesso!",
+          );
           form.reset();
           document.getElementById("repertorioId").value = "";
-          document.getElementById("btn-salvar").textContent = "Salvar repertorio";
+          document.getElementById("btn-salvar").textContent =
+            "Salvar repertorio";
           atualizarCampos();
           carregarRepertorios();
         } else {
@@ -342,13 +353,16 @@
         document.getElementById("pages").value = item.pages || "";
         document.getElementById("year").value = item.year || "";
         document.getElementById("author").value = item.author || "";
-        document.getElementById("knowledgeArea").value = item.knowledgeArea || "";
+        document.getElementById("knowledgeArea").value =
+          item.knowledgeArea || "";
         document.getElementById("coverUrl").value = item.coverUrl || "";
         document.getElementById("synopsis").value = item.synopsis || "";
         document.getElementById("info").value = item.info || "";
-        document.getElementById("highlightedData").value = item.highlightedData || "";
+        document.getElementById("highlightedData").value =
+          item.highlightedData || "";
         document.getElementById("thematicAxes").value = item.thematicAxes || "";
-        document.getElementById("streamingLinks").value = item.streamingLinks || "";
+        document.getElementById("streamingLinks").value =
+          item.streamingLinks || "";
         document.getElementById("trailerUrl").value = item.trailerUrl || "";
         document.getElementById("sourceLinks").value = item.sourceLinks || "";
         document.getElementById("essayUse").value = item.essayUse || "";
