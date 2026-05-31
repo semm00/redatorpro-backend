@@ -1,210 +1,312 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel de Repertorios</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 20px; color: #1f2936; }
-    h1, h2 { color: #246493; }
-    form, .box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 24px; }
-    label { font-weight: 700; margin: 12px 0 6px; display: block; }
-    input, textarea, select, button { box-sizing: border-box; display: block; width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #d7e0ea; border-radius: 6px; }
-    textarea { min-height: 92px; resize: vertical; }
-    button { background: #246493; color: #fff; border: none; cursor: pointer; font-weight: 700; }
-    button:hover { background: #3399ff; }
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .danger { background: #c0392b; }
-    .danger:hover { background: #e74c3c; }
-    .muted { color: #6b7280; }
-    [data-field] { display: none; }
-    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; gap: 0; } }
-  </style>
-</head>
-<body>
-  <h1>Painel de Repertorios</h1>
-  <p class="muted">Cadastre repertorios que aparecem dinamicamente na tela do app.</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel de Repertorios</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f7f7f7;
+        margin: 0;
+        padding: 20px;
+        color: #1f2936;
+      }
+      h1,
+      h2 {
+        color: #246493;
+      }
+      form,
+      .box {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 24px;
+      }
+      label {
+        font-weight: 700;
+        margin: 12px 0 6px;
+        display: block;
+      }
+      input,
+      textarea,
+      select,
+      button {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #d7e0ea;
+        border-radius: 6px;
+      }
+      textarea {
+        min-height: 92px;
+        resize: vertical;
+      }
+      button {
+        background: #246493;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      button:hover {
+        background: #3399ff;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .danger {
+        background: #c0392b;
+      }
+      .danger:hover {
+        background: #e74c3c;
+      }
+      .muted {
+        color: #6b7280;
+      }
+      [data-field] {
+        display: none;
+      }
+      @media (max-width: 760px) {
+        .grid {
+          grid-template-columns: 1fr;
+          gap: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Painel de Repertorios</h1>
+    <p class="muted">
+      Cadastre repertorios que aparecem dinamicamente na tela do app.
+    </p>
 
-  <form id="form-repertorio" enctype="multipart/form-data">
-    <label for="category">Categoria *</label>
-    <select id="category" name="category" required>
-      <option value="cinema">Cinema</option>
-      <option value="livros">Livros</option>
-      <option value="conhecimentos-gerais">Conhecimentos Gerais</option>
-      <option value="dados-pesquisas">Dados e Pesquisas</option>
-      <option value="citacoes">Citacoes</option>
-    </select>
+    <form id="form-repertorio" enctype="multipart/form-data">
+      <label for="category">Categoria *</label>
+      <select id="category" name="category" required>
+        <option value="cinema">Cinema</option>
+        <option value="livros">Livros</option>
+        <option value="conhecimentos-gerais">Conhecimentos Gerais</option>
+        <option value="dados-pesquisas">Dados e Pesquisas</option>
+        <option value="citacoes">Citacoes</option>
+      </select>
 
-    <label for="title">Titulo / nome / citacao *</label>
-    <input type="text" id="title" name="title" required>
+      <label for="title">Titulo / nome / citacao *</label>
+      <input type="text" id="title" name="title" required />
 
-    <div class="grid">
-      <div data-field="cinema">
-        <label for="type">Tipo</label>
-        <select id="type" name="type">
-          <option value="">Selecione</option>
-          <option value="Filme">Filme</option>
-          <option value="Documentario">Documentario</option>
-          <option value="Serie">Serie</option>
-        </select>
+      <div class="grid">
+        <div data-field="cinema">
+          <label for="type">Tipo</label>
+          <select id="type" name="type">
+            <option value="">Selecione</option>
+            <option value="Filme">Filme</option>
+            <option value="Documentario">Documentario</option>
+            <option value="Serie">Serie</option>
+          </select>
+        </div>
+        <div data-field="cinema livros">
+          <label for="genre">Genero</label>
+          <input type="text" id="genre" name="genre" />
+        </div>
+        <div data-field="cinema">
+          <label for="duration">Duracao</label>
+          <input type="text" id="duration" name="duration" />
+        </div>
+        <div data-field="cinema">
+          <label for="rating">Classificacao indicativa</label>
+          <input type="text" id="rating" name="rating" />
+        </div>
+        <div data-field="cinema">
+          <label for="country">Pais</label>
+          <input type="text" id="country" name="country" />
+        </div>
+        <div data-field="livros">
+          <label for="pages">Paginas</label>
+          <input type="text" id="pages" name="pages" />
+        </div>
+        <div data-field="cinema livros">
+          <label for="year">Ano</label>
+          <input
+            type="number"
+            id="year"
+            name="year"
+            min="1800"
+            max="2100"
+            placeholder="Ex: 2024"
+          />
+        </div>
+        <div data-field="citacoes">
+          <label for="author">Autor</label>
+          <input type="text" id="author" name="author" />
+        </div>
+        <div data-field="conhecimentos-gerais">
+          <label for="knowledgeArea">Area do conhecimento</label>
+          <input type="text" id="knowledgeArea" name="knowledgeArea" />
+        </div>
       </div>
+
+      <div class="grid">
+        <div data-field="cinema livros conhecimentos-gerais dados-pesquisas">
+          <label for="coverUrl">Capa por URL</label>
+          <input type="url" id="coverUrl" name="coverUrl" />
+        </div>
+        <div data-field="cinema livros conhecimentos-gerais dados-pesquisas">
+          <label for="capa">Capa por arquivo</label>
+          <input type="file" id="capa" name="capa" accept="image/*" />
+        </div>
+      </div>
+
       <div data-field="cinema livros">
-        <label for="genre">Genero</label>
-        <input type="text" id="genre" name="genre">
+        <label for="synopsis">Sinopse</label>
+        <textarea id="synopsis" name="synopsis"></textarea>
       </div>
+
+      <div data-field="conhecimentos-gerais dados-pesquisas">
+        <label for="info">Informacoes</label>
+        <textarea id="info" name="info"></textarea>
+      </div>
+
+      <div data-field="dados-pesquisas">
+        <label for="highlightedData">Principais dados marcados</label>
+        <textarea
+          id="highlightedData"
+          name="highlightedData"
+          placeholder="Um dado por linha ou separado por virgula"
+        ></textarea>
+      </div>
+
+      <label for="thematicAxes">Eixos tematicos</label>
+      <textarea
+        id="thematicAxes"
+        name="thematicAxes"
+        placeholder="Um eixo por linha ou separado por virgula"
+      ></textarea>
+
       <div data-field="cinema">
-        <label for="duration">Duracao</label>
-        <input type="text" id="duration" name="duration">
+        <label for="streamingLinks">Streamings disponiveis / links</label>
+        <textarea id="streamingLinks" name="streamingLinks"></textarea>
       </div>
+
       <div data-field="cinema">
-        <label for="rating">Classificacao indicativa</label>
-        <input type="text" id="rating" name="rating">
+        <label for="trailerUrl">Trailer</label>
+        <input type="url" id="trailerUrl" name="trailerUrl" />
       </div>
-      <div data-field="cinema">
-        <label for="country">Pais</label>
-        <input type="text" id="country" name="country">
+
+      <div data-field="livros conhecimentos-gerais dados-pesquisas">
+        <label for="sourceLinks">Fontes / links uteis</label>
+        <textarea id="sourceLinks" name="sourceLinks"></textarea>
       </div>
-      <div data-field="livros">
-        <label for="pages">Paginas</label>
-        <input type="text" id="pages" name="pages">
-      </div>
-      <div data-field="citacoes">
-        <label for="author">Autor</label>
-        <input type="text" id="author" name="author">
-      </div>
-      <div data-field="conhecimentos-gerais">
-        <label for="knowledgeArea">Area do conhecimento</label>
-        <input type="text" id="knowledgeArea" name="knowledgeArea">
-      </div>
+
+      <label for="essayUse">Como poderia ser usado na redacao *</label>
+      <textarea id="essayUse" name="essayUse" required></textarea>
+
+      <button type="submit">Salvar repertorio</button>
+    </form>
+
+    <h2>Excluir repertorio</h2>
+    <div class="box">
+      <input
+        type="text"
+        id="busca-repertorio"
+        placeholder="Pesquisar por titulo"
+      />
+      <select id="select-repertorio"></select>
+      <button class="danger" id="btn-excluir" type="button">
+        Excluir selecionado
+      </button>
     </div>
 
-    <div class="grid">
-      <div data-field="cinema livros conhecimentos-gerais dados-pesquisas">
-        <label for="coverUrl">Capa por URL</label>
-        <input type="url" id="coverUrl" name="coverUrl">
-      </div>
-      <div data-field="cinema livros conhecimentos-gerais dados-pesquisas">
-        <label for="capa">Capa por arquivo</label>
-        <input type="file" id="capa" name="capa" accept="image/*">
-      </div>
-    </div>
+    <script>
+      const category = document.getElementById("category");
+      const form = document.getElementById("form-repertorio");
+      const busca = document.getElementById("busca-repertorio");
+      const select = document.getElementById("select-repertorio");
+      let repertorios = [];
 
-    <div data-field="cinema livros">
-      <label for="synopsis">Sinopse</label>
-      <textarea id="synopsis" name="synopsis"></textarea>
-    </div>
+      function atualizarCampos() {
+        document.querySelectorAll("[data-field]").forEach((field) => {
+          field.style.display = field.dataset.field
+            .split(" ")
+            .includes(category.value)
+            ? "block"
+            : "none";
+        });
+      }
 
-    <div data-field="conhecimentos-gerais dados-pesquisas">
-      <label for="info">Informacoes</label>
-      <textarea id="info" name="info"></textarea>
-    </div>
+      function atualizarSelect(filtro = "") {
+        const termo = filtro.toLowerCase();
+        const filtrados = repertorios.filter((item) =>
+          item.title.toLowerCase().includes(termo),
+        );
+        select.innerHTML = "";
+        if (!filtrados.length) {
+          select.innerHTML =
+            '<option value="">Nenhum repertorio encontrado</option>';
+          return;
+        }
+        filtrados.forEach((item) => {
+          const option = document.createElement("option");
+          option.value = item.id;
+          option.textContent = `${item.title} (${item.category}${item.year ? " - " + item.year : ""})`;
+          select.appendChild(option);
+        });
+      }
 
-    <div data-field="dados-pesquisas">
-      <label for="highlightedData">Principais dados marcados</label>
-      <textarea id="highlightedData" name="highlightedData" placeholder="Um dado por linha ou separado por virgula"></textarea>
-    </div>
+      async function carregarRepertorios() {
+        select.innerHTML = "<option>Carregando...</option>";
+        const response = await fetch("/repertorios");
+        repertorios = response.ok ? await response.json() : [];
+        atualizarSelect(busca.value);
+      }
 
-    <label for="thematicAxes">Eixos tematicos</label>
-    <textarea id="thematicAxes" name="thematicAxes" placeholder="Um eixo por linha ou separado por virgula"></textarea>
+      category.addEventListener("change", atualizarCampos);
+      busca.addEventListener("input", () => atualizarSelect(busca.value));
 
-    <div data-field="cinema">
-      <label for="streamingLinks">Streamings disponiveis / links</label>
-      <textarea id="streamingLinks" name="streamingLinks"></textarea>
-    </div>
-
-    <div data-field="cinema">
-      <label for="trailerUrl">Trailer</label>
-      <input type="url" id="trailerUrl" name="trailerUrl">
-    </div>
-
-    <div data-field="livros conhecimentos-gerais dados-pesquisas">
-      <label for="sourceLinks">Fontes / links uteis</label>
-      <textarea id="sourceLinks" name="sourceLinks"></textarea>
-    </div>
-
-    <label for="essayUse">Como poderia ser usado na redacao *</label>
-    <textarea id="essayUse" name="essayUse" required></textarea>
-
-    <button type="submit">Salvar repertorio</button>
-  </form>
-
-  <h2>Excluir repertorio</h2>
-  <div class="box">
-    <input type="text" id="busca-repertorio" placeholder="Pesquisar por titulo">
-    <select id="select-repertorio"></select>
-    <button class="danger" id="btn-excluir" type="button">Excluir selecionado</button>
-  </div>
-
-  <script>
-    const category = document.getElementById('category');
-    const form = document.getElementById('form-repertorio');
-    const busca = document.getElementById('busca-repertorio');
-    const select = document.getElementById('select-repertorio');
-    let repertorios = [];
-
-    function atualizarCampos() {
-      document.querySelectorAll('[data-field]').forEach((field) => {
-        field.style.display = field.dataset.field.split(' ').includes(category.value) ? 'block' : 'none';
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        const response = await fetch("/repertorios", {
+          method: "POST",
+          body: formData,
+        });
+        if (response.ok) {
+          alert("Repertorio salvo com sucesso!");
+          form.reset();
+          atualizarCampos();
+          carregarRepertorios();
+        } else {
+          const data = await response.json().catch(() => ({}));
+          alert(data.error || "Erro ao salvar repertorio.");
+        }
       });
-    }
 
-    function atualizarSelect(filtro = '') {
-      const termo = filtro.toLowerCase();
-      const filtrados = repertorios.filter((item) => item.title.toLowerCase().includes(termo));
-      select.innerHTML = '';
-      if (!filtrados.length) {
-        select.innerHTML = '<option value="">Nenhum repertorio encontrado</option>';
-        return;
-      }
-      filtrados.forEach((item) => {
-        const option = document.createElement('option');
-        option.value = item.id;
-        option.textContent = `${item.title} (${item.category})`;
-        select.appendChild(option);
-      });
-    }
+      document
+        .getElementById("btn-excluir")
+        .addEventListener("click", async () => {
+          const id = select.value;
+          if (!id) return alert("Selecione um repertorio.");
+          const item = repertorios.find(
+            (repertorio) => String(repertorio.id) === String(id),
+          );
+          if (!confirm(`Excluir "${item?.title || "repertorio"}"?`)) return;
+          const response = await fetch(`/repertorios/${id}`, {
+            method: "DELETE",
+          });
+          if (response.ok) {
+            alert("Repertorio excluido.");
+            carregarRepertorios();
+          } else {
+            alert("Erro ao excluir repertorio.");
+          }
+        });
 
-    async function carregarRepertorios() {
-      select.innerHTML = '<option>Carregando...</option>';
-      const response = await fetch('/repertorios');
-      repertorios = response.ok ? await response.json() : [];
-      atualizarSelect(busca.value);
-    }
-
-    category.addEventListener('change', atualizarCampos);
-    busca.addEventListener('input', () => atualizarSelect(busca.value));
-
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const formData = new FormData(form);
-      const response = await fetch('/repertorios', { method: 'POST', body: formData });
-      if (response.ok) {
-        alert('Repertorio salvo com sucesso!');
-        form.reset();
-        atualizarCampos();
-        carregarRepertorios();
-      } else {
-        const data = await response.json().catch(() => ({}));
-        alert(data.error || 'Erro ao salvar repertorio.');
-      }
-    });
-
-    document.getElementById('btn-excluir').addEventListener('click', async () => {
-      const id = select.value;
-      if (!id) return alert('Selecione um repertorio.');
-      const item = repertorios.find((repertorio) => String(repertorio.id) === String(id));
-      if (!confirm(`Excluir "${item?.title || 'repertorio'}"?`)) return;
-      const response = await fetch(`/repertorios/${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        alert('Repertorio excluido.');
-        carregarRepertorios();
-      } else {
-        alert('Erro ao excluir repertorio.');
-      }
-    });
-
-    atualizarCampos();
-    carregarRepertorios();
-  </script>
-</body>
+      atualizarCampos();
+      carregarRepertorios();
+    </script>
+  </body>
 </html>

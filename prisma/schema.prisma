@@ -140,6 +140,7 @@ model Repertorio {
   synopsis        String?
   essayUse        String
   trailerUrl      String?
+  year            Int?
   thematicAxes    Json?
   streamingLinks  Json?
   sourceLinks     Json?
