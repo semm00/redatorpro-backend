@@ -15,6 +15,7 @@ import temasRouter from "./router/temas.js";
 import redCorretoresRouter from "./router/red-corretores.js";
 import correcaoRouter from "./router/correcao.js";
 import progressoRouter from "./router/progresso.js";
+import repertoriosRouter from "./router/repertorios.js";
 
 import dotenv from "dotenv";
 import authMiddleware from "./middlewares/auth.js"; // Novo middleware JWT
@@ -75,6 +76,7 @@ app.use("/temas", temasRouter);
 app.use("/red-corretores", redCorretoresRouter);
 app.use("/correcao", authMiddleware, correcaoRouter);
 app.use("/progresso", authMiddleware, progressoRouter);
+app.use("/repertorios", repertoriosRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -123,6 +123,34 @@ model TextoMotivador {
 }
 
 // Novo: avalições individuais (avaliação da correção da redação por seu autor)
+model Repertorio {
+  id              Int      @id @default(autoincrement())
+  category        String
+  type            String?
+  coverUrl        String?
+  genre           String?
+  duration        String?
+  rating          String?
+  country         String?
+  title           String
+  author          String?
+  pages           String?
+  knowledgeArea   String?
+  info            String?
+  synopsis        String?
+  essayUse        String
+  trailerUrl      String?
+  thematicAxes    Json?
+  streamingLinks  Json?
+  sourceLinks     Json?
+  highlightedData Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([category])
+  @@map("repertorios")
+}
+
 model Rating {
   id           Int      @id @default(autoincrement())
   essayId      Int
