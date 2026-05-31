@@ -87,6 +87,7 @@
     </p>
 
     <form id="form-repertorio" enctype="multipart/form-data">
+      <input type="hidden" id="repertorioId" name="id" />
       <label for="category">Categoria *</label>
       <select id="category" name="category" required>
         <option value="cinema">Cinema</option>
@@ -205,7 +206,10 @@
       <label for="essayUse">Como poderia ser usado na redacao *</label>
       <textarea id="essayUse" name="essayUse" required></textarea>
 
-      <button type="submit">Salvar repertorio</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button type="submit" id="btn-salvar">Salvar repertorio</button>
+        <button type="button" id="btn-novo" style="background:#f3f4f6;color:#1f2936;border:1px solid #e5e7eb;">Novo</button>
+      </div>
     </form>
 
     <h2>Excluir repertorio</h2>
@@ -270,13 +274,24 @@
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const formData = new FormData(form);
-        const response = await fetch("/repertorios", {
-          method: "POST",
-          body: formData,
-        });
+        const id = document.getElementById("repertorioId").value;
+        let response;
+        if (id) {
+          response = await fetch(`/repertorios/${encodeURIComponent(id)}`, {
+            method: "PUT",
+            body: formData,
+          });
+        } else {
+          response = await fetch("/repertorios", {
+            method: "POST",
+            body: formData,
+          });
+        }
         if (response.ok) {
-          alert("Repertorio salvo com sucesso!");
+          alert(id ? "Repertorio atualizado com sucesso!" : "Repertorio salvo com sucesso!");
           form.reset();
+          document.getElementById("repertorioId").value = "";
+          document.getElementById("btn-salvar").textContent = "Salvar repertorio";
           atualizarCampos();
           carregarRepertorios();
         } else {
@@ -307,6 +322,46 @@
 
       atualizarCampos();
       carregarRepertorios();
+
+      // preencher formulario ao selecionar
+      select.addEventListener("change", () => {
+        const id = select.value;
+        if (!id) return;
+        const item = repertorios.find((r) => String(r.id) === String(id));
+        if (!item) return;
+        // popular campos
+        document.getElementById("repertorioId").value = item.id;
+        document.getElementById("category").value = item.category || "";
+        atualizarCampos();
+        document.getElementById("title").value = item.title || "";
+        document.getElementById("type").value = item.type || "";
+        document.getElementById("genre").value = item.genre || "";
+        document.getElementById("duration").value = item.duration || "";
+        document.getElementById("rating").value = item.rating || "";
+        document.getElementById("country").value = item.country || "";
+        document.getElementById("pages").value = item.pages || "";
+        document.getElementById("year").value = item.year || "";
+        document.getElementById("author").value = item.author || "";
+        document.getElementById("knowledgeArea").value = item.knowledgeArea || "";
+        document.getElementById("coverUrl").value = item.coverUrl || "";
+        document.getElementById("synopsis").value = item.synopsis || "";
+        document.getElementById("info").value = item.info || "";
+        document.getElementById("highlightedData").value = item.highlightedData || "";
+        document.getElementById("thematicAxes").value = item.thematicAxes || "";
+        document.getElementById("streamingLinks").value = item.streamingLinks || "";
+        document.getElementById("trailerUrl").value = item.trailerUrl || "";
+        document.getElementById("sourceLinks").value = item.sourceLinks || "";
+        document.getElementById("essayUse").value = item.essayUse || "";
+        document.getElementById("btn-salvar").textContent = "Salvar alterações";
+      });
+
+      // botao novo/limpar
+      document.getElementById("btn-novo").addEventListener("click", () => {
+        form.reset();
+        document.getElementById("repertorioId").value = "";
+        document.getElementById("btn-salvar").textContent = "Salvar repertorio";
+        atualizarCampos();
+      });
     </script>
   </body>
 </html>
